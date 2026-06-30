@@ -1,0 +1,29 @@
+import { ConflictException, Injectable } from '@nestjs/common';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { UsersService } from 'src/users/users.service';
+import bcrypt from 'bcrypt';
+
+@Injectable()
+export class AuthService {
+  private readonly SALT_ROUNDS = 10;
+
+  constructor(private readonly appUser: UsersService) {}
+
+  async signup(dto: CreateUserDto) {
+    const existing = await this.appUser.findByEmail(dto.email);
+    if (existing) {
+      throw new ConflictException('Email already registered');
+    }
+
+    const pwdHash = await bcrypt.hash(dto.password, this.SALT_ROUNDS);
+
+    const user = await this.appUser.create({
+      email: dto.email,
+      password: pwdHash,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+    });
+
+    return { id: user.id, email: user.email };
+  }
+}
