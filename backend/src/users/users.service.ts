@@ -9,19 +9,19 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createUserDto: CreateUserDto): Promise<User> {
-    return this.prisma.appuser.create(createUserDto);
+    return this.prisma.app_user.create(createUserDto);
   }
 
   findAll() {
-    return this.prisma.appuser.findAll();
+    return this.prisma.app_user.findAll();
   }
 
   findById(id: number) {
-    return this.prisma.appuser.findUnique(id);
+    return this.prisma.app_user.findUnique(id);
   }
 
   findByEmail(CreateUserDto): Promise<User | null> {
-    return this.prisma.appuser.findUnique(CreateUserDto.email);
+    return this.prisma.app_user.findUnique(CreateUserDto.email);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

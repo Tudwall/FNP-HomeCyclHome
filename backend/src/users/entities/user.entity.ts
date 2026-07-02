@@ -1,10 +1,10 @@
 export class User {
-  id: string;
+  id: number;
   email: string;
   password: string;
   firstName?: string;
   lastName?: string;
-  is_active!: string;
+  is_active!: boolean;
   createdOn!: Date;
   updatedOn?: Date;
   deletedOn?: Date;
