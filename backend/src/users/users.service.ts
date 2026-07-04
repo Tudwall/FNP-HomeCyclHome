@@ -29,38 +29,16 @@ export class UsersService {
   }
 
   update(id: number, updateUserDto: UpdateUserDto): Promise<appUser> {
-    try {
-      return this.prisma.app_user.update({
-        where: { id },
-        data: updateUserDto,
-      });
-    } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        if (err.code === 'P2025') {
-          throw new NotFoundException(`User #${id} not fount`);
-        }
-        if (err.code === 'P2002') {
-          throw new ConflictException('Conflict');
-        }
-      }
-      throw err;
-    }
+    return this.prisma.app_user.update({
+      where: { id },
+      data: updateUserDto,
+    });
   }
 
   remove(id: number): Promise<appUser> {
-    try {
-      return this.prisma.app_user.update({
-        where: { id },
-        data: { deletedOn: new Date() },
-      });
-    } catch (err) {
-      if (
-        err instanceof Prisma.PrismaClientKnownRequestError &&
-        err.code === 'P2025'
-      ) {
-        throw new NotFoundException(`User #${id} not found`);
-      }
-      throw err;
-    }
+    return this.prisma.app_user.update({
+      where: { id },
+      data: { deletedOn: new Date() },
+    });
   }
 }
