@@ -9,7 +9,7 @@ datasource db {
   extensions = [postgis]
 }
 
-model app_user {
+model AppUser {
   id              Int                 @id @default(autoincrement())
   email           String              @unique @db.VarChar(50)
   password        String              @db.VarChar(50)
@@ -25,6 +25,8 @@ model app_user {
   userFullAddress user_full_address[]
   userPermission  user_permission[]
   userRole        user_role[]
+
+  @@map("app_user")
 }
 
 model bike {
@@ -37,7 +39,7 @@ model bike {
   typeId       Int            @map("type_id")
   bikeModel    bike_model     @relation(fields: [id1], references: [id], onDelete: NoAction, onUpdate: NoAction)
   bikeType     bike_type      @relation(fields: [typeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  appUser      app_user       @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser      AppUser        @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   intervention intervention[]
 }
 
@@ -68,7 +70,7 @@ model comment {
   userId         Int          @map("user_id")
   interventionId Int          @map("intervention_id")
   intervention   intervention @relation(fields: [interventionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  appUser        app_user     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser        AppUser      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model company_info {
@@ -130,7 +132,7 @@ model intervention {
   bike           bike                @relation(fields: [cycleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   interval_      interval_           @relation(fields: [interventionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   job            job                 @relation(fields: [jobId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  appUser        app_user            @relation(fields: [mechanicId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser        AppUser             @relation(fields: [mechanicId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   payment        payment[]
 }
 
@@ -180,7 +182,7 @@ model user_full_address {
   userId        Int          @map("user_id")
   fullAddressId Int          @map("full_address_id")
   fullAddress   full_address @relation(fields: [fullAddressId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  appUser       app_user     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser       AppUser      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([userId, fullAddressId])
 }
@@ -189,7 +191,7 @@ model user_permission {
   userId       Int        @map("user_id")
   permissionId Int        @map("permission_id")
   permission   permission @relation(fields: [permissionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  appUser      app_user   @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser      AppUser    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([userId, permissionId])
 }
@@ -198,7 +200,7 @@ model user_role {
   userId  Int      @map("user_id")
   roleId  Int      @map("role_id")
   role    role     @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  appUser app_user @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser AppUser  @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([userId, roleId])
 }
