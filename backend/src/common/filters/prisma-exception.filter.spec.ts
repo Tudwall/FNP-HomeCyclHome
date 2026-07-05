@@ -53,6 +53,15 @@ describe('PrismaExceptionFilter', () => {
     );
   });
 
+  it('P2002 sans meta.target -> message générique', () => {
+    filter.catch(buildError('P2002'), host);
+    expect(reply).toHaveBeenCalledWith(
+      response,
+      expect.objectContaining({ message: 'Unique constraint failed' }),
+      HttpStatus.CONFLICT,
+    );
+  });
+
   it('P2003 -> 400', () => {
     filter.catch(buildError('P2003'), host);
 

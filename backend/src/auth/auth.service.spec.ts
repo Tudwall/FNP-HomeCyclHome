@@ -4,12 +4,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 describe('AuthService', () => {
   let service: AuthService;
   let users: { findByEmail: jest.Mock; create: jest.Mock };
+  let jwt: { signAsync: jest.Mock };
 
   const dto: CreateUserDto = {
     email: 'test@test.com',
@@ -20,6 +21,7 @@ describe('AuthService', () => {
 
   beforeEach(async () => {
     users = { findByEmail: jest.fn(), create: jest.fn() };
+    jwt = { signAsync: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -27,7 +29,7 @@ describe('AuthService', () => {
         { provide: UsersService, useValue: users },
         {
           provide: JwtService,
-          useValue: jest.fn().mockResolvedValue('signed-token'),
+          useValue: jwt,
         },
       ],
     }).compile();
@@ -65,6 +67,55 @@ describe('AuthService', () => {
         lastName: dto.lastName,
       });
       expect(result).toEqual({ id: 42, email: dto.email });
+    });
+  });
+
+  describe('login', () => {
+    const loginDto = { email: 'test@test.com', password: 'plaintext' };
+
+    it('rejette si aucun user, sans comparer le hash', async () => {
+      users.findByEmail.mockResolvedValue(null);
+
+      await expect(service.login(loginDto)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+      expect(bcrypt.compare).not.toHaveBeenCalled();
+    });
+
+    it('rejette si le mot de passe ne matche pas', async () => {
+      users.findByEmail.mockResolvedValue({
+        id: 1,
+        email: loginDto.email,
+        password: 'hash',
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(service.login(loginDto)).rejects.toBeInstanceOf(
+        UnauthorizedException,
+      );
+      expect(jwt.signAsync).not.toHaveBeenCalled();
+    });
+
+    it('renvoie accessToken + user quand les credentials sont bons', async () => {
+      users.findByEmail.mockResolvedValue({
+        id: 7,
+        email: loginDto.email,
+        password: 'hash',
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      jwt.signAsync.mockResolvedValue('signed-token');
+
+      const result = await service.login(loginDto);
+
+      expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, 'hash');
+      expect(jwt.signAsync).toHaveBeenCalledWith({
+        sub: 7,
+        email: loginDto.email,
+      });
+      expect(result).toEqual({
+        accessToken: 'signed-token',
+        user: { id: 7, email: loginDto.email },
+      });
     });
   });
 });

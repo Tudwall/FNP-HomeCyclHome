@@ -37,7 +37,8 @@
     "passport-jwt": "^4.0.1",
     "pg": "^8.22.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -80,9 +81,21 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.spec.ts",
+      "!**/generated/**",
+      "!main.ts",
+      "!**/*.module.ts"
     ],
     "coverageDirectory": "../coverage",
+    "coverageThreshold": {
+      "global": {
+        "statements": 100,
+        "functions": 100,
+        "lines": 100,
+        "branches": 80
+      }
+    },
     "testEnvironment": "node",
     "moduleNameMapper": {
       "generated/prisma/client(\\.js)?$": "<rootDir>/../test/mocks/prisma-client.ts",
