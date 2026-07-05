@@ -62,7 +62,7 @@ describe('AuthController', () => {
   });
 
   describe('logout', () => {
-    it('efface le cookie et renvoie {success: true}', async () => {
+    it('efface le cookie et renvoie {success: true}', () => {
       const result = controller.logout(res as unknown as Response);
 
       expect(res.clearCookie).toHaveBeenCalledWith('access_token');
