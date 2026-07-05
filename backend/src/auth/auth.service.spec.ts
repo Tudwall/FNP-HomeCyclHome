@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
 import { ConflictException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -21,7 +22,14 @@ describe('AuthService', () => {
     users = { findByEmail: jest.fn(), create: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService, { provide: UsersService, useValue: users }],
+      providers: [
+        AuthService,
+        { provide: UsersService, useValue: users },
+        {
+          provide: JwtService,
+          useValue: jest.fn().mockResolvedValue('signed-token'),
+        },
+      ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
