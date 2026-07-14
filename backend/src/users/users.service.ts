@@ -32,7 +32,7 @@ export class UsersService {
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return this.prisma.appUser.update({
-      where: { id },
+      where: { id, deletedOn: null },
       data: updateUserDto,
       omit: { password: true },
     });
@@ -40,7 +40,7 @@ export class UsersService {
 
   remove(id: number) {
     return this.prisma.appUser.update({
-      where: { id },
+      where: { id, deletedOn: null },
       data: { deletedOn: new Date() },
       omit: { password: true },
     });

@@ -114,7 +114,7 @@ describe('UsersService', () => {
       const result = await service.update(1, dto);
 
       expect(prisma.appUser.update).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { id: 1, deletedOn: null },
         data: dto,
         omit: { password: true },
       });
@@ -129,7 +129,7 @@ describe('UsersService', () => {
       await service.remove(1);
 
       expect(prisma.appUser.update).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { id: 1, deletedOn: null },
         data: { deletedOn: expect.any(Date) },
         omit: { password: true },
       });
