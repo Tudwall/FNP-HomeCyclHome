@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { PrismaService } from 'prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { first } from 'rxjs';
+import passport from 'passport';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -63,6 +63,7 @@ describe('UsersService', () => {
 
       expect(prisma.appUser.findMany).toHaveBeenCalledWith({
         where: { deletedOn: null },
+        omit: { password: true },
       });
       expect(result).toBe(users);
     });
@@ -77,6 +78,7 @@ describe('UsersService', () => {
 
       expect(prisma.appUser.findUnique).toHaveBeenCalledWith({
         where: { id: 1, deletedOn: null },
+        omit: { password: true },
       });
       expect(result).toBe(user);
     });
@@ -115,6 +117,7 @@ describe('UsersService', () => {
       expect(prisma.appUser.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: dto,
+        omit: { password: true },
       });
       expect(result).toBe(updated);
     });
@@ -129,6 +132,7 @@ describe('UsersService', () => {
       expect(prisma.appUser.update).toHaveBeenCalledWith({
         where: { id: 1 },
         data: { deletedOn: expect.any(Date) },
+        omit: { password: true },
       });
     });
   });
