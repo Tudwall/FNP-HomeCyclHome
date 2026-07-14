@@ -24,7 +24,11 @@ describe('PrismaExceptionFilter', () => {
   });
 
   const buildError = (code: string, meta?: Record<string, unknown>) =>
-    new Prisma.PrismaClientKnownRequestError('boom', { code, meta });
+    new Prisma.PrismaClientKnownRequestError('boom', {
+      code,
+      clientVersion: 'test',
+      meta,
+    });
 
   it('P2025 -> 404', () => {
     filter.catch(buildError('P2025'), host);
