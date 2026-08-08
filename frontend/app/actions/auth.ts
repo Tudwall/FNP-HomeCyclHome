@@ -63,7 +63,7 @@ export async function signupAction(
 ): Promise<FormState> {
 	const parsed = signupSchema.safeParse({
 		firstName: formData.get("firstName"),
-		lastname: formData.get("lastName"),
+		lastName: formData.get("lastName"),
 		email: formData.get("email"),
 		password: formData.get("password"),
 		confirmPassword: formData.get("confirmPassword"),
@@ -81,7 +81,7 @@ export async function signupAction(
 			auth: false,
 		});
 		await startSession(
-			await apiLogin({ emial: payload.email, password: payload.password }),
+			await apiLogin({ email: payload.email, password: payload.password }),
 		);
 	} catch (error) {
 		if (error instanceof ApiError) {
