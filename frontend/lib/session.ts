@@ -17,3 +17,11 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 		throw error;
 	}
 });
+
+export const getOptionalUser = cache(async (): Promise<SessionUser | null> => {
+	try {
+		return await getCurrentUser();
+	} catch {
+		return null;
+	}
+});
