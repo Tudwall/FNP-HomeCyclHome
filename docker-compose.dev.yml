@@ -27,6 +27,8 @@ services:
     restart: always
     env_file:
       - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://homecyclhome:mdplocal@postgres:5432/homecyclhome
     ports:
       - "3000:3000"
     networks:
