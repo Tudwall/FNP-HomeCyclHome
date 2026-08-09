@@ -1,10 +1,15 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 
 export function configureApp(app: INestApplication): void {
+  const config = app.get(ConfigService);
+
   app.use(cookieParser());
+  // Pas de repli permissif : sans FRONTEND_URL, on refuse de démarrer plutôt
+  // que d'accepter n'importe quelle origine avec credentials.
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? true,
+    origin: config.getOrThrow<string>('FRONTEND_URL'),
     credentials: true,
   });
   app.useGlobalPipes(
@@ -14,4 +19,5 @@ export function configureApp(app: INestApplication): void {
       transform: true,
     }),
   );
+  app.enableShutdownHooks();
 }

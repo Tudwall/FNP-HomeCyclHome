@@ -9,8 +9,10 @@ interface JwtPayload {
   email: string;
 }
 
-export const cookieExtractor = (req: Request): string | null =>
-  req?.cookies?.access_token ?? null;
+export const cookieExtractor = (req: Request): string | null => {
+  const cookies = req?.cookies as Record<string, string> | undefined;
+  return cookies?.access_token ?? null;
+};
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
