@@ -1,8 +1,11 @@
 import "server-only";
 import { cookies } from "next/headers";
 
-const API_URL = process.env.API_URL;
-if (!API_URL) throw new Error("API_URL manquante");
+function apiUrl(): string {
+	const url = process.env.API_URL;
+	if (!url) throw new Error("API_URL manquante");
+	return url;
+}
 
 export class ApiError extends Error {
 	constructor(
@@ -30,7 +33,7 @@ async function request(
 		if (token) h.set("Cookie", `access_token=${token}`);
 	}
 
-	const res = await fetch(`${API_URL}${path}`, {
+	const res = await fetch(`${apiUrl()}${path}`, {
 		cache: "no-store",
 		...init,
 		headers: h,
