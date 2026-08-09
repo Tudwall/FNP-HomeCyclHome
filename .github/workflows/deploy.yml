@@ -78,12 +78,23 @@ jobs:
 
       - name: Health check
         run: |
-          sleep 10
-          curl -f http://localhost:3000/health || exit 1
-          curl -f http://localhost:3001 || exit 1
+          # Scrutation plutôt qu'une attente fixe : un premier démarrage
+          # (volume vierge + migrations Prisma) est bien plus lent qu'un
+          # redéploiement courant.
+          for i in $(seq 1 30); do
+            if curl -fs http://localhost:3000/health >/dev/null \
+               && curl -fs http://localhost:3001/ >/dev/null; then
+              echo "Services disponibles après $((i * 5))s"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Services indisponibles après 150s"
+          exit 1
 
       - name: Show logs on failure
         if: failure()
         run: |
+          docker compose ps || true
           docker logs backend || true
           docker logs frontend || true
