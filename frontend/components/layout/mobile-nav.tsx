@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { LogoutButton } from "./logout-button";
 
 type NavItem = { href: string; label: string };
 
@@ -25,7 +26,7 @@ export function MobileNav({
 				aria-label={isOpen ? "Fermer le menu" : "Ouvrir le menu"}
 				className="rounded-md p-2 text-navy hover:bg-surface-alt"
 			>
-				{isOpen ? <Menu size={22} /> : <X size={22} />}
+				{isOpen ? <X size={22} /> : <Menu size={22} />}
 			</button>
 
 			{isOpen && (
@@ -44,13 +45,35 @@ export function MobileNav({
 								{item.label}
 							</Link>
 						))}
-						<Link
-							href={isAuthenticated ? "/mon-compte" : "/login"}
-							onClick={() => setIsOpen(false)}
-							className="text-sm font-medium text-navy"
-						>
-							{isAuthenticated ? "Mon compte" : "Connexion"}
-						</Link>
+						{isAuthenticated ? (
+							<>
+								<Link
+									href="/mon-compte"
+									onClick={() => setIsOpen(false)}
+									className="text-sm font-medium text-navy"
+								>
+									Mon compte
+								</Link>
+								<LogoutButton />
+							</>
+						) : (
+							<>
+								<Link
+									href="/login"
+									onClick={() => setIsOpen(false)}
+									className="text-sm font-medium text-navy"
+								>
+									Se connecter
+								</Link>
+								<Link
+									href="/signup"
+									onClick={() => setIsOpen(false)}
+									className="text-sm font-semibold text-navy"
+								>
+									Créer un compte
+								</Link>
+							</>
+						)}
 						<Link
 							href="/reserver"
 							onClick={() => setIsOpen(false)}

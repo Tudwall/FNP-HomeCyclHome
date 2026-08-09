@@ -4,6 +4,7 @@ import { getOptionalUser } from "@/lib/session";
 import { NavLink } from "./nav-link";
 import { MobileNav } from "./mobile-nav";
 import { Logo } from "./logo";
+import { LogoutButton } from "./logout-button";
 
 const NAV_ITEMS = [
 	{ href: "/", label: "Accueil" },
@@ -39,13 +40,33 @@ export async function SiteHeader() {
 				</nav>
 
 				<div className="flex items-center gap-2">
-					<Link
-						href={user ? "/mon-compte" : "/login"}
-						aria-label={user ? "Mon compte" : "Se connecter"}
-						className="hidden rounded-full p-2 text-navy transition-colors hover:bg-surface-alt hover:text-brand md:block"
-					>
-						<UserRound size={22} aria-hidden="true" />
-					</Link>
+					{user ? (
+						<div className="hidden items-center gap-4 md:flex">
+							<Link
+								href="/mon-compte"
+								className="flex items-center gap-2 text-sm font-medium text-navy transition-colors hover:text-brand"
+							>
+								<UserRound size={20} aria-hidden="true" />
+								{user.firstName}
+							</Link>
+							<LogoutButton className="rounded-md border border-navy/20 px-4 py-2 hover:border-brand" />
+						</div>
+					) : (
+						<div className="hidden items-center gap-2 md:flex">
+							<Link
+								href="/login"
+								className="rounded-md px-4 py-2 text-sm font-medium text-navy transition-colors hover:text-brand"
+							>
+								Se connecter
+							</Link>
+							<Link
+								href="/signup"
+								className="rounded-md border border-navy/20 px-4 py-2 text-sm font-semibold text-navy transition-colors hover:border-brand hover:text-brand"
+							>
+								Créer un compte
+							</Link>
+						</div>
+					)}
 					<MobileNav items={NAV_ITEMS} isAuthenticated={Boolean(user)} />
 				</div>
 			</div>
