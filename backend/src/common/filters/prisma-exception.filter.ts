@@ -3,6 +3,7 @@ import {
   Catch,
   ExceptionFilter,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
@@ -10,6 +11,8 @@ import { Prisma } from 'src/generated/prisma/client';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(PrismaExceptionFilter.name);
+
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
   catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
     const { httpAdapter } = this.httpAdapterHost;
@@ -43,6 +46,8 @@ export class PrismaExceptionFilter implements ExceptionFilter {
           message: 'Related record not found',
         };
       default:
+        // Sans ce log, une panne de base devient indiagnosticable en production.
+        this.logger.error(`Erreur Prisma non mappée ${e.code}: ${e.message}`);
         return {
           status: HttpStatus.INTERNAL_SERVER_ERROR,
           message: 'Database error',
