@@ -72,17 +72,15 @@ export async function signupAction(
 		return { errors: z.flattenError(parsed.error).fieldErrors };
 	}
 
-	const { confirmPassword: _ignored, ...payload } = parsed.data;
+	const { firstName, lastName, email, password } = parsed.data;
 
 	try {
 		await apiFetch("/auth/signup", {
 			method: "POST",
-			body: payload,
+			body: { firstName, lastName, email, password },
 			auth: false,
 		});
-		await startSession(
-			await apiLogin({ email: payload.email, password: payload.password }),
-		);
+		await startSession(await apiLogin({ email, password }));
 	} catch (error) {
 		if (error instanceof ApiError) {
 			if (error.status === 409) {

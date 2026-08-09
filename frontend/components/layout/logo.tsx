@@ -1,7 +1,17 @@
-export function Logo() {
+export function Logo({
+	tone = "brand",
+	className = "text-lg",
+}: {
+	tone?: "brand" | "navy";
+	className?: string;
+}) {
 	return (
-		<span className="font-heading text-lg font-extrabold tracking-tight text-navy">
-			Home<span className="text-brand">Cycl</span>Home
+		<span
+			className={`font-heading font-extrabold tracking-tight text-navy ${className}`}
+		>
+			Home
+			<span className={tone === "brand" ? "text-brand" : undefined}>Cycl</span>
+			Home
 		</span>
 	);
 }
