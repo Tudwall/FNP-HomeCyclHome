@@ -1,0 +1,15 @@
+info:
+  name: signup
+  type: http
+
+http:
+  method: POST
+  url: /auth/signup
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+​
