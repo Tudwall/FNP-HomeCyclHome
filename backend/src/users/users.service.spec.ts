@@ -99,7 +99,7 @@ describe('UsersService', () => {
       const result = await service.findByEmail('test@test.com');
 
       expect(prisma.appUser.findUnique).toHaveBeenCalledWith({
-        where: { email: 'test@test.com' },
+        where: { email: 'test@test.com', deletedOn: null },
       });
       expect(result).toBe(user);
     });
