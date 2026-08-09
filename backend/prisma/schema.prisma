@@ -1,0 +1,238 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  moduleFormat    = "cjs"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [postgis]
+}
+
+model AppUser {
+  id              Int                 @id @default(autoincrement())
+  email           String              @unique @db.VarChar(255)
+  password        String              @db.VarChar(255)
+  firstName       String              @map("first_name") @db.VarChar(100)
+  lastName        String              @map("last_name") @db.VarChar(100)
+  isActive        Boolean             @default(true) @map("is_active")
+  createdOn       DateTime            @default(now()) @map("created_on") @db.Timestamp(6)
+  updatedOn       DateTime?           @updatedAt @map("updated_on") @db.Timestamp(6)
+  deletedOn       DateTime?           @map("deleted_on") @db.Timestamp(6)
+  bike            bike[]
+  comment         comment[]
+  intervention    intervention[]
+  userFullAddress user_full_address[]
+  userPermission  user_permission[]
+  userRole        user_role[]
+
+  @@map("app_user")
+}
+
+model bike {
+  id           Int            @id @default(autoincrement())
+  createdOn    DateTime       @default(now()) @map("created_on") @db.Timestamp(6)
+  updatedOn    DateTime?      @updatedAt @map("updated_on") @db.Timestamp(6)
+  deletedOn    DateTime?      @map("deleted_on") @db.Timestamp(6)
+  id1          Int            @map("id_1")
+  userId       Int            @map("user_id")
+  typeId       Int            @map("type_id")
+  bikeModel    bike_model     @relation(fields: [id1], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  bikeType     bike_type      @relation(fields: [typeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser      AppUser        @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  intervention intervention[]
+}
+
+model bike_brand {
+  id        Int          @id @default(autoincrement())
+  brandName String?      @map("brand_name") @db.VarChar(50)
+  bikeModel bike_model[]
+}
+
+model bike_model {
+  id        Int        @id @default(autoincrement())
+  modelName String?    @map("model_name") @db.VarChar(50)
+  brandId   Int        @map("brand_id")
+  bike      bike[]
+  bikeBrand bike_brand @relation(fields: [brandId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model bike_type {
+  id       Int     @id @default(autoincrement())
+  bikeType String? @map("bike_type") @db.VarChar(50)
+  bike     bike[]
+}
+
+model comment {
+  id             Int          @id @default(autoincrement())
+  text           String       @db.VarChar(1000)
+  createdOn      DateTime     @default(now()) @map("created_on") @db.Timestamp(6)
+  userId         Int          @map("user_id")
+  interventionId Int          @map("intervention_id")
+  intervention   intervention @relation(fields: [interventionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser        AppUser      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model company_info {
+  id            Int          @id @default(autoincrement())
+  name          String       @db.VarChar(50)
+  description   String       @db.VarChar(300)
+  phoneNumber   String       @map("phone_number") @db.VarChar(12)
+  linkedinLink  String?      @map("linkedin_link") @db.VarChar(100)
+  facebookLink  String?      @map("facebook_link") @db.VarChar(100)
+  twitterLink   String?      @map("twitter_link") @db.VarChar(100)
+  instagramLink String?      @map("instagram_link") @db.VarChar(100)
+  fullAddressId Int          @unique @map("full_address_id")
+  fullAddress   full_address @relation(fields: [fullAddressId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model file {
+  id             Int          @id @default(autoincrement())
+  mimeType       mime_type    @map("mime_type")
+  url            String       @db.VarChar(200)
+  interventionId Int          @map("intervention_id")
+  intervention   intervention @relation(fields: [interventionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model full_address {
+  id              Int                 @id @default(autoincrement())
+  number          String?             @db.VarChar(50)
+  street          String?             @db.VarChar(150)
+  postalCode      String?             @map("postal_code") @db.VarChar(10)
+  locality        String?             @db.VarChar(100)
+  region          String?             @db.VarChar(100)
+  country         String?             @db.VarChar(100)
+  zoneId          Int                 @unique @map("zone_id")
+  companyInfo     company_info?
+  zone            zone                @relation(fields: [zoneId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userFullAddress user_full_address[]
+}
+
+model interval_ {
+  id           Int            @id @default(autoincrement())
+  startDate    DateTime       @map("start_date") @db.Timestamp(6)
+  endDate      DateTime       @map("end_date") @db.Timestamp(6)
+  intervention intervention[]
+}
+
+model intervention {
+  id             Int                 @id @default(autoincrement())
+  status         intervention_status
+  isCancelled    Boolean?            @map("is_cancelled")
+  cancelledOn    DateTime?           @map("cancelled_on") @db.Timestamp(6)
+  createdOn      DateTime            @default(now()) @map("created_on") @db.Timestamp(6)
+  updatedOn      DateTime?           @updatedAt @map("updated_on") @db.Timestamp(6)
+  deletedOn      DateTime?           @map("deleted_on") @db.Timestamp(6)
+  interventionId Int                 @map("intervention_id")
+  jobId          Int                 @map("job_id")
+  mechanicId     Int                 @map("mechanic_id")
+  cycleId        Int                 @map("cycle_id")
+  comment        comment[]
+  file           file[]
+  bike           bike                @relation(fields: [cycleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  interval_      interval_           @relation(fields: [interventionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  job            job                 @relation(fields: [jobId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser        AppUser             @relation(fields: [mechanicId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  payment        payment[]
+}
+
+model job {
+  id           Int            @id @default(autoincrement())
+  name         String         @db.VarChar(100)
+  price        Decimal        @db.Decimal(6, 2)
+  duration     String         @db.VarChar(50)
+  intervention intervention[]
+}
+
+model payment {
+  id             Int            @id @default(autoincrement())
+  status         payment_status
+  type           payment_type
+  amount         Decimal        @db.Decimal(8, 2)
+  createdOn      DateTime       @default(now()) @map("created_on") @db.Timestamp(6)
+  updatedOn      DateTime?      @updatedAt @map("updated_on") @db.Timestamp(6)
+  interventionId Int            @map("intervention_id")
+  intervention   intervention   @relation(fields: [interventionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model permission {
+  id             Int               @id
+  permission     String            @db.VarChar(50)
+  rolePermission role_permission[]
+  userPermission user_permission[]
+}
+
+model role {
+  id             Int               @id
+  label          String            @db.VarChar(50)
+  rolePermission role_permission[]
+  userRole       user_role[]
+}
+
+model role_permission {
+  roleId        Int        @map("role_id")
+  permissionsId Int        @map("permissions_id")
+  permission    permission @relation(fields: [permissionsId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  role          role       @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([roleId, permissionsId])
+}
+
+model user_full_address {
+  userId        Int          @map("user_id")
+  fullAddressId Int          @map("full_address_id")
+  fullAddress   full_address @relation(fields: [fullAddressId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser       AppUser      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([userId, fullAddressId])
+}
+
+model user_permission {
+  userId       Int        @map("user_id")
+  permissionId Int        @map("permission_id")
+  permission   permission @relation(fields: [permissionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser      AppUser    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([userId, permissionId])
+}
+
+model user_role {
+  userId  Int      @map("user_id")
+  roleId  Int      @map("role_id")
+  role    role     @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser AppUser  @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([userId, roleId])
+}
+
+model zone {
+  id          Int                     @id
+  coordinates Unsupported("geometry")
+  label       String                  @db.VarChar(50)
+  createdOn   DateTime                @default(now()) @map("created_on") @db.Timestamp(6)
+  updatedOn   DateTime?               @updatedAt @map("updated_on") @db.Timestamp(6)
+  deletedOn   DateTime?               @map("deleted_on") @db.Timestamp(6)
+  fullAddress full_address?
+}
+
+enum intervention_status {
+  pending
+  done
+  cancelled
+}
+
+enum mime_type {
+  image_jpeg @map("image/jpeg")
+  image_png  @map("image/png")
+}
+
+enum payment_status {
+  processed
+  awaiting
+}
+
+enum payment_type {
+  debit_card
+  cash
+}
