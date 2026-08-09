@@ -70,7 +70,7 @@ jobs:
 
       - name: Build & Deploy
         run: |
-          docker compose build --no-cache
+          docker compose build
           docker compose up -d --remove-orphans
 
       - name: Clean up old images
