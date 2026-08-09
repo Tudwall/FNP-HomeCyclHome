@@ -5,15 +5,20 @@ import {
   HttpCode,
   Body,
   Res,
+  Get,
+  Req,
+  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { Public } from './decorators/public.decorator';
-import { Get, Req } from '@nestjs/common';
-import type { Request } from 'express';
 import { UsersService } from 'src/users/users.service';
+
+const SESSION_MAX_AGE_MS = 1000 * 60 * 60;
 
 @Controller('auth')
 export class AuthController {
@@ -30,6 +35,8 @@ export class AuthController {
   }
 
   @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
@@ -41,7 +48,8 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 1000 * 60 * 60,
+      path: '/',
+      maxAge: SESSION_MAX_AGE_MS,
     });
     return user;
   }
@@ -50,13 +58,22 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token');
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
     return { success: true };
   }
 
   @Get('me')
-  me(@Req() req: Request) {
+  async me(@Req() req: Request) {
     const { userId } = req.user as { userId: number; email: string };
-    return this.usersService.findById(userId);
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('Session invalide');
+    }
+    return user;
   }
 }

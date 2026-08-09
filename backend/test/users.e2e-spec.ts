@@ -13,6 +13,24 @@ describe('Users & Auth (e2e)', () => {
 
   const password = 'password123';
   const loginEmail = 'e2e-login@test.fr';
+  const otherEmail = 'e2e-other@test.fr';
+
+  let loginId: number;
+  let otherId: number;
+
+  async function signup(email: string): Promise<number> {
+    const res = await request(server)
+      .post('/auth/signup')
+      .send({ email, password, firstName: 'A', lastName: 'B' })
+      .expect(201);
+    return (res.body as { id: number }).id;
+  }
+
+  async function agentFor(email: string) {
+    const agent = request.agent(server);
+    await agent.post('/auth/login').send({ email, password }).expect(200);
+    return agent;
+  }
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -27,25 +45,14 @@ describe('Users & Auth (e2e)', () => {
     prisma = app.get(PrismaService);
     await prisma.appUser.deleteMany({ where: { email: { contains: 'e2e-' } } });
 
-    await request(server)
-      .post('/auth/signup')
-      .send({ email: loginEmail, password, firstName: 'Log', lastName: 'In' })
-      .expect(201);
+    loginId = await signup(loginEmail);
+    otherId = await signup(otherEmail);
   });
 
   afterAll(async () => {
     await prisma.appUser.deleteMany({ where: { email: { contains: 'e2e-' } } });
     await app.close();
   });
-
-  async function authAgent() {
-    const agent = request.agent(server);
-    await agent
-      .post('/auth/login')
-      .send({ email: loginEmail, password })
-      .expect(200);
-    return agent;
-  }
 
   describe('POST /auth/signup', () => {
     it('201 + renvoie {id, email} sans pwd', async () => {
@@ -104,40 +111,68 @@ describe('Users & Auth (e2e)', () => {
     });
   });
 
-  describe('GET /users', () => {
+  describe('GET /auth/me', () => {
     it('sans cookie -> 401', async () => {
-      await request(server).get('/users').expect(401);
+      await request(server).get('/auth/me').expect(401);
     });
 
-    it('avec cookie -> 200 et aucun password dans les items', async () => {
-      const agent = await authAgent();
-      const res = await agent.get('/users').expect(200);
-      expect(Array.isArray(res.body)).toBe(true);
-      for (const u of res.body) expect(u).not.toHaveProperty('password');
+    it('avec cookie -> 200 sans password', async () => {
+      const agent = await agentFor(loginEmail);
+      const res = await agent.get('/auth/me').expect(200);
+      expect(res.body).toMatchObject({ id: loginId, email: loginEmail });
+      expect(res.body).not.toHaveProperty('password');
+    });
+  });
+
+  describe('GET /users (annuaire retiré tant qu’il n’y a pas de RBAC)', () => {
+    it('la route n’existe plus -> 404', async () => {
+      const agent = await agentFor(loginEmail);
+      await agent.get('/users').expect(404);
     });
   });
 
   describe('GET /users/:id', () => {
+    it('sans cookie -> 401', async () => {
+      await request(server).get(`/users/${loginId}`).expect(401);
+    });
+
+    it('son propre compte -> 200 sans password', async () => {
+      const agent = await agentFor(loginEmail);
+      const res = await agent.get(`/users/${loginId}`).expect(200);
+      expect(res.body).not.toHaveProperty('password');
+    });
+
+    it('le compte d’autrui -> 403', async () => {
+      const agent = await agentFor(loginEmail);
+      await agent.get(`/users/${otherId}`).expect(403);
+    });
+
     it('id non numérique -> 400 (ParseIntPipe)', async () => {
-      const agent = await authAgent();
+      const agent = await agentFor(loginEmail);
       await agent.get('/users/abc').expect(400);
     });
   });
 
-  describe('PATCH / DELETE /users/:id (soft-delete)', () => {
-    it('cycle PATCH ok -> champ interdit 400 -> DELETE -> re-DELETE/PATCH 404', async () => {
-      const agent = await authAgent();
+  describe('PATCH / DELETE sur le compte d’autrui', () => {
+    it('PATCH -> 403', async () => {
+      const agent = await agentFor(loginEmail);
+      await agent
+        .patch(`/users/${otherId}`)
+        .send({ firstName: 'Pirate' })
+        .expect(403);
+    });
 
-      const created = await request(server)
-        .post('/auth/signup')
-        .send({
-          email: 'e2e-target@test.fr',
-          password,
-          firstName: 'T',
-          lastName: 'G',
-        })
-        .expect(201);
-      const id = created.body.id as number;
+    it('DELETE -> 403', async () => {
+      const agent = await agentFor(loginEmail);
+      await agent.delete(`/users/${otherId}`).expect(403);
+    });
+  });
+
+  describe('Cycle sur son propre compte (soft-delete)', () => {
+    it('PATCH ok -> champ interdit 400 -> DELETE -> re-DELETE/PATCH 404', async () => {
+      const email = 'e2e-cycle@test.fr';
+      const id = await signup(email);
+      const agent = await agentFor(email);
 
       await agent
         .patch(`/users/${id}`)
@@ -154,9 +189,16 @@ describe('Users & Auth (e2e)', () => {
       await agent.patch(`/users/${id}`).send({ firstName: 'X' }).expect(404);
     });
 
-    it('PATCH id inexistant → 404', async () => {
-      const agent = await authAgent();
-      await agent.patch('/users/99999999').send({ firstName: 'X' }).expect(404);
+    it('un compte soft-supprimé ne peut plus se connecter', async () => {
+      const email = 'e2e-deleted@test.fr';
+      const id = await signup(email);
+      const agent = await agentFor(email);
+      await agent.delete(`/users/${id}`).expect(200);
+
+      await request(server)
+        .post('/auth/login')
+        .send({ email, password })
+        .expect(401);
     });
   });
 });

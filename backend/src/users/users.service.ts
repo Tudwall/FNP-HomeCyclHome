@@ -27,7 +27,9 @@ export class UsersService {
   }
 
   findByEmail(email: string): Promise<AppUser | null> {
-    return this.prisma.appUser.findUnique({ where: { email } });
+    return this.prisma.appUser.findUnique({
+      where: { email, deletedOn: null },
+    });
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
