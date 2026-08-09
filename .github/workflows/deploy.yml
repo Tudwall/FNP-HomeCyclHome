@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  test-backend:
     runs-on: self-hosted
     defaults:
       run:
@@ -27,8 +27,38 @@ jobs:
       - name: Run tests
         run: npm test
 
+  test-frontend:
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        env:
+          API_URL: http://localhost:3000
+        run: npm run build
+
   deploy:
-    needs: test
+    needs: [test-backend, test-frontend]
     runs-on: self-hosted
 
     steps:
@@ -39,12 +69,8 @@ jobs:
         run: docker compose down --remove-orphans || true
 
       - name: Build & Deploy
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
         run: |
-          docker compose build \
-            --build-arg NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
-            --no-cache
+          docker compose build --no-cache
           docker compose up -d --remove-orphans
 
       - name: Clean up old images
