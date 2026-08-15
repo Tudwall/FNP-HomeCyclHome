@@ -1,10 +1,18 @@
 info:
   name: login
   type: http
+  seq: 1
 
 http:
   method: POST
   url: http://localhost:3000/auth/login
+  body:
+    type: json
+    data: |-
+      {
+        "email": "pierredepiets@hotmail.fr",
+        "password": "pierre64"
+      }
   auth: inherit
 
 settings:
@@ -12,4 +20,3 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-​
