@@ -5,7 +5,6 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-/** Requête authentifiée minimale : seul `user.userId` est lu par le contrôleur. */
 const reqAs = (userId: number) => ({ user: { userId } }) as unknown as Request;
 
 describe('UsersController', () => {
