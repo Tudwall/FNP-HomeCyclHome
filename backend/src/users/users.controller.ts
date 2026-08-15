@@ -17,10 +17,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  /**
-   * Tant qu'il n'y a pas de RBAC, un compte ne peut agir que sur lui-même.
-   * À remplacer par un guard de rôle quand les tables role/permission seront câblées.
-   */
   private assertSelf(req: Request, id: number) {
     const { userId } = req.user as { userId: number };
     if (userId !== id) {
