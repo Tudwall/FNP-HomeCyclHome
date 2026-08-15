@@ -1,6 +1,7 @@
 info:
   name: logout
   type: http
+  seq: 1
 
 http:
   method: POST
@@ -12,4 +13,3 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-​
