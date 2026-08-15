@@ -22,7 +22,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
   ],
   controllers: [AppController],
   providers: [
-    AppService,
     { provide: APP_FILTER, useClass: PrismaExceptionFilter },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
