@@ -15,7 +15,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot({
       throttlers: [{ ttl: 60_000, limit: 5 }],
-      // Les tests e2e enchaînent les logins ; le quota fausserait les assertions.
       skipIf: () => process.env.NODE_ENV === 'test',
     }),
     UsersModule,
