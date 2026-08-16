@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from 'prisma/prisma.module';
@@ -15,7 +14,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot({
       throttlers: [{ ttl: 60_000, limit: 5 }],
-      // Les tests e2e enchaînent les logins ; le quota fausserait les assertions.
       skipIf: () => process.env.NODE_ENV === 'test',
     }),
     UsersModule,
@@ -24,7 +22,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
   ],
   controllers: [AppController],
   providers: [
-    AppService,
     { provide: APP_FILTER, useClass: PrismaExceptionFilter },
     { provide: APP_GUARD, useClass: JwtAuthGuard },
   ],
