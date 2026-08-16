@@ -31,6 +31,12 @@ FRONTEND_URL= url frontend
 docker compose -f docker-compose.dev.yml up
 ```
 
+##### Jeu de données de test
+
+```bash
+docker compose -f docker-compose.dev.yml exec backend npx prisma db seed
+```
+
 #### Production
 
 ```bash
