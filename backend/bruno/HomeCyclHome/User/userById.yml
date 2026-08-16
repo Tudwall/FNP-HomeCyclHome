@@ -1,10 +1,11 @@
 info:
-  name: Patch
+  name: userByd
   type: http
+  seq: 1
 
 http:
-  method: PATCH
-  url: http://localhost:3000/users/999999
+  method: GET
+  url: http://localhost:3000/users/1
   auth: inherit
 
 settings:
