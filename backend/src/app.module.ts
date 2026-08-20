@@ -8,6 +8,7 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter'
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { CyclesModule } from './cycles/cycles.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     UsersModule,
     AuthModule,
     PrismaModule,
+    CyclesModule,
   ],
   controllers: [AppController],
   providers: [
