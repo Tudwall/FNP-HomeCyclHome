@@ -35,10 +35,10 @@ model bike {
   createdOn    DateTime       @default(now()) @map("created_on") @db.Timestamp(6)
   updatedOn    DateTime?      @updatedAt @map("updated_on") @db.Timestamp(6)
   deletedOn    DateTime?      @map("deleted_on") @db.Timestamp(6)
-  id1          Int            @map("id_1")
+  modelId          Int        @map("model_id")
   userId       Int            @map("user_id")
   typeId       Int            @map("type_id")
-  bikeModel    bike_model     @relation(fields: [id1], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  bikeModel    bike_model     @relation(fields: [modelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   bikeType     bike_type      @relation(fields: [typeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   appUser      AppUser        @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   intervention intervention[]
