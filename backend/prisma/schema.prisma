@@ -20,7 +20,7 @@ model AppUser {
   createdOn       DateTime            @default(now()) @map("created_on") @db.Timestamp(6)
   updatedOn       DateTime?           @updatedAt @map("updated_on") @db.Timestamp(6)
   deletedOn       DateTime?           @map("deleted_on") @db.Timestamp(6)
-  bike            bike[]
+  bikes            Bike[]
   comment         comment[]
   intervention    intervention[]
   userFullAddress user_full_address[]
@@ -30,18 +30,20 @@ model AppUser {
   @@map("app_user")
 }
 
-model bike {
+model Bike {
   id           Int            @id @default(autoincrement())
   createdOn    DateTime       @default(now()) @map("created_on") @db.Timestamp(6)
   updatedOn    DateTime?      @updatedAt @map("updated_on") @db.Timestamp(6)
   deletedOn    DateTime?      @map("deleted_on") @db.Timestamp(6)
-  id1          Int            @map("id_1")
+  bikeModelId          Int            @map("id_1")
   userId       Int            @map("user_id")
   typeId       Int            @map("type_id")
-  bikeModel    bike_model     @relation(fields: [id1], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  bikeModel    bike_model     @relation(fields: [bikeModelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   bikeType     bike_type      @relation(fields: [typeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   appUser      AppUser        @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   intervention intervention[]
+
+  @@map("bike")
 }
 
 model bike_brand {
@@ -54,14 +56,14 @@ model bike_model {
   id        Int        @id @default(autoincrement())
   modelName String?    @map("model_name") @db.VarChar(50)
   brandId   Int        @map("brand_id")
-  bike      bike[]
+  bikes      Bike[]
   bikeBrand bike_brand @relation(fields: [brandId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model bike_type {
   id       Int     @id @default(autoincrement())
   bikeType String? @map("bike_type") @db.VarChar(50)
-  bike     bike[]
+  bikes     Bike[]
 }
 
 model comment {
@@ -130,7 +132,7 @@ model intervention {
   cycleId        Int                 @map("cycle_id")
   comment        comment[]
   file           file[]
-  bike           bike                @relation(fields: [cycleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  bike           Bike                @relation(fields: [cycleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   interval_      interval_           @relation(fields: [interventionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   job            job                 @relation(fields: [jobId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   appUser        AppUser             @relation(fields: [mechanicId], references: [id], onDelete: NoAction, onUpdate: NoAction)
