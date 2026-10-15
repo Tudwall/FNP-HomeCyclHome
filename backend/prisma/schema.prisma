@@ -20,7 +20,7 @@ model AppUser {
   createdOn       DateTime            @default(now()) @map("created_on") @db.Timestamp(6)
   updatedOn       DateTime?           @updatedAt @map("updated_on") @db.Timestamp(6)
   deletedOn       DateTime?           @map("deleted_on") @db.Timestamp(6)
-  bikes            Bike[]
+  bikes           Bike[]
   comment         comment[]
   intervention    intervention[]
   userFullAddress user_full_address[]
@@ -35,35 +35,42 @@ model Bike {
   createdOn    DateTime       @default(now()) @map("created_on") @db.Timestamp(6)
   updatedOn    DateTime?      @updatedAt @map("updated_on") @db.Timestamp(6)
   deletedOn    DateTime?      @map("deleted_on") @db.Timestamp(6)
-  bikeModelId          Int            @map("id_1")
+  bikeModelId  Int            @map("id_1")
   userId       Int            @map("user_id")
   typeId       Int            @map("type_id")
-  bikeModel    bike_model     @relation(fields: [bikeModelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  bikeType     bike_type      @relation(fields: [typeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  bikeModel    BikeModel      @relation(fields: [bikeModelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  bikeType     BikeType       @relation(fields: [typeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   appUser      AppUser        @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   intervention intervention[]
 
   @@map("bike")
 }
 
-model bike_brand {
-  id        Int          @id @default(autoincrement())
-  brandName String?      @map("brand_name") @db.VarChar(50)
-  bikeModel bike_model[]
+model BikeBrand {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique @map("brand_name") @db.VarChar(50)
+  bikeModel BikeModel[]
+
+  @@map("bike_brand")
 }
 
-model bike_model {
-  id        Int        @id @default(autoincrement())
-  modelName String?    @map("model_name") @db.VarChar(50)
-  brandId   Int        @map("brand_id")
-  bikes      Bike[]
-  bikeBrand bike_brand @relation(fields: [brandId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model bike_type {
-  id       Int     @id @default(autoincrement())
-  bikeType String? @map("bike_type") @db.VarChar(50)
+model BikeModel {
+  id        Int       @id @default(autoincrement())
+  name      String    @map("model_name") @db.VarChar(50)
+  brandId   Int       @map("brand_id")
   bikes     Bike[]
+  bikeBrand BikeBrand @relation(fields: [brandId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([brandId, name])
+  @@map("bike_model")
+}
+
+model BikeType {
+  id    Int    @id @default(autoincrement())
+  name  String @unique @map("bike_type") @db.VarChar(50)
+  bikes Bike[]
+
+  @@map("bike_type")
 }
 
 model comment {
@@ -200,10 +207,10 @@ model user_permission {
 }
 
 model user_role {
-  userId  Int      @map("user_id")
-  roleId  Int      @map("role_id")
-  role    role     @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  appUser AppUser  @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userId  Int     @map("user_id")
+  roleId  Int     @map("role_id")
+  role    role    @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appUser AppUser @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([userId, roleId])
 }
