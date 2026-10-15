@@ -7,6 +7,8 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { BikesService } from './bikes.service';
 import { CreateBikeDto } from './dto/create-bike.dto';
@@ -48,6 +50,7 @@ export class BikesController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   remove(@CurrentUser() user: AuthUser, @Param('id', ParseIntPipe) id: number) {
     return this.bikesService.remove(user.userId, id);
   }

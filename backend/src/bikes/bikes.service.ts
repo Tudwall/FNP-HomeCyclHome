@@ -1,12 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/prisma.service';
 import { CreateBikeDto } from './dto/create-bike.dto';
 import { UpdateBikeDto } from './dto/update-bike.dto';
+import type { Prisma } from 'src/generated/prisma/client';
 
 const BIKE_DETAILS = {
   bikeType: true,
   bikeModel: { include: { bikeBrand: true } },
-};
+} as const satisfies Prisma.BikeInclude;
 
 @Injectable()
 export class BikesService {
@@ -27,15 +28,11 @@ export class BikesService {
     });
   }
 
-  async findOne(userId: number, id: number) {
-    const bike = await this.prisma.bike.findUnique({
+  findOne(userId: number, id: number) {
+    return this.prisma.bike.findUniqueOrThrow({
       where: { id, userId, deletedOn: null },
       include: BIKE_DETAILS,
     });
-    if (!bike) {
-      throw new NotFoundException(`Vélo ${id} introuvable`);
-    }
-    return bike;
   }
 
   update(userId: number, id: number, updateBikeDto: UpdateBikeDto) {
@@ -46,8 +43,8 @@ export class BikesService {
     });
   }
 
-  remove(userId: number, id: number) {
-    return this.prisma.bike.update({
+  async remove(userId: number, id: number): Promise<void> {
+    await this.prisma.bike.update({
       where: { id, userId, deletedOn: null },
       data: { deletedOn: new Date() },
     });
