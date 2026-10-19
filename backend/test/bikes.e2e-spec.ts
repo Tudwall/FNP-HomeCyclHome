@@ -19,7 +19,6 @@ describe('Bikes (e2e)', () => {
   const ownerEmail = `owner${DOMAIN}`;
   const otherEmail = `other${DOMAIN}`;
 
-  let ownerId: number;
   let typeId: number;
   let otherTypeId: number;
   let bikeModelId: number;
@@ -85,7 +84,7 @@ describe('Bikes (e2e)', () => {
       })
     ).id;
 
-    ownerId = await signup(ownerEmail);
+    await signup(ownerEmail);
     await signup(otherEmail);
   });
 
@@ -116,16 +115,16 @@ describe('Bikes (e2e)', () => {
         .expect(201);
 
       expect(res.body).toMatchObject({
-        userId: ownerId,
         bikeModelId,
         typeId,
-        deletedOn: null,
         bikeType: { id: typeId, name: `${REF} type A` },
         bikeModel: {
           id: bikeModelId,
           bikeBrand: { name: `${REF} brand` },
         },
       });
+      expect(res.body).not.toHaveProperty('userId');
+      expect(res.body).not.toHaveProperty('deletedOn');
     });
 
     it('userId dans le body -> 400 (forbidNonWhitelisted)', async () => {
@@ -172,7 +171,7 @@ describe('Bikes (e2e)', () => {
       const id = await createBike(ownerEmail);
       const agent = await agentFor(ownerEmail);
       const res = await agent.get(`/bikes/${id}`).expect(200);
-      expect(res.body).toMatchObject({ id, userId: ownerId });
+      expect(res.body).toMatchObject({ id });
     });
 
     it('id non numérique -> 400 (ParseIntPipe)', async () => {
@@ -200,7 +199,7 @@ describe('Bikes (e2e)', () => {
 
       const owner = await agentFor(ownerEmail);
       const res = await owner.get(`/bikes/${id}`).expect(200);
-      expect(res.body).toMatchObject({ typeId, deletedOn: null });
+      expect(res.body).toMatchObject({ typeId });
     });
   });
 
