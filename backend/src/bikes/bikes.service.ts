@@ -9,6 +9,11 @@ const BIKE_DETAILS = {
   bikeModel: { include: { bikeBrand: true } },
 } as const satisfies Prisma.BikeInclude;
 
+const BIKE_HIDDEN = {
+  userId: true,
+  deletedOn: true,
+} as const satisfies Prisma.BikeOmit;
+
 @Injectable()
 export class BikesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -17,6 +22,7 @@ export class BikesService {
     return this.prisma.bike.create({
       data: { ...createBikeDto, userId },
       include: BIKE_DETAILS,
+      omit: BIKE_HIDDEN,
     });
   }
 
@@ -24,6 +30,7 @@ export class BikesService {
     return this.prisma.bike.findMany({
       where: { userId, deletedOn: null },
       include: BIKE_DETAILS,
+      omit: BIKE_HIDDEN,
       orderBy: { createdOn: 'desc' },
     });
   }
@@ -32,6 +39,7 @@ export class BikesService {
     return this.prisma.bike.findUniqueOrThrow({
       where: { id, userId, deletedOn: null },
       include: BIKE_DETAILS,
+      omit: BIKE_HIDDEN,
     });
   }
 
@@ -40,6 +48,7 @@ export class BikesService {
       where: { id, userId, deletedOn: null },
       data: updateBikeDto,
       include: BIKE_DETAILS,
+      omit: BIKE_HIDDEN,
     });
   }
 
