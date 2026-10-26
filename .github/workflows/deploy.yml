@@ -18,6 +18,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check free disk space
+        run: |
+          free_gb=$(df --output=avail -BG / | tail -1 | tr -dc '0-9')
+          echo "Espace libre: ${free_gb} Go"
+          if [ "$free_gb" -lt 6 ]; then
+            echo "::error::Moins de 6Go disponibles, déploiement annulé avant d'arrêter la prod"
+            exit 1
+          fi
+
       - name: Cleanup old containers
         run: docker compose down --remove-orphans || true
 
@@ -26,8 +35,11 @@ jobs:
           docker compose build
           docker compose up -d --remove-orphans
 
-      - name: Clean up old images
-        run: docker image prune -f
+      - name: Clean up docker
+        if: always()
+        run: |
+          docker image prune -f
+          docker builder prune -f --filter "until=168h"
 
       - name: Health check
         run: |
