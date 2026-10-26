@@ -8,6 +8,11 @@ const BIKE_DETAILS = {
   bikeModel: { include: { bikeBrand: true } },
 };
 
+const BIKE_HIDDEN = {
+  userId: true,
+  deletedOn: true,
+};
+
 describe('BikesService', () => {
   let service: BikesService;
   let prisma: {
@@ -51,6 +56,7 @@ describe('BikesService', () => {
       expect(prisma.bike.create).toHaveBeenCalledWith({
         data: { bikeModelId: 3, typeId: 2, userId: 14 },
         include: BIKE_DETAILS,
+        omit: BIKE_HIDDEN,
       });
       expect(result).toBe(created);
     });
@@ -66,6 +72,7 @@ describe('BikesService', () => {
       expect(prisma.bike.findMany).toHaveBeenCalledWith({
         where: { userId: 14, deletedOn: null },
         include: BIKE_DETAILS,
+        omit: BIKE_HIDDEN,
         orderBy: { createdOn: 'desc' },
       });
       expect(result).toBe(bikes);
@@ -82,6 +89,7 @@ describe('BikesService', () => {
       expect(prisma.bike.findUniqueOrThrow).toHaveBeenCalledWith({
         where: { id: 1, userId: 14, deletedOn: null },
         include: BIKE_DETAILS,
+        omit: BIKE_HIDDEN,
       });
       expect(result).toBe(bike);
     });
@@ -106,6 +114,7 @@ describe('BikesService', () => {
         where: { id: 1, userId: 14, deletedOn: null },
         data: dto,
         include: BIKE_DETAILS,
+        omit: BIKE_HIDDEN,
       });
       expect(result).toBe(updated);
     });

@@ -49,7 +49,7 @@ model Bike {
 model BikeBrand {
   id        Int         @id @default(autoincrement())
   name      String      @unique @map("brand_name") @db.VarChar(50)
-  bikeModel BikeModel[]
+  models BikeModel[]
 
   @@map("bike_brand")
 }
