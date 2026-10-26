@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { apiFetch, ApiError } from "./api";
+import { redirect } from "next/navigation";
 
 export type SessionUser = {
 	id: number;
@@ -25,3 +26,9 @@ export const getOptionalUser = cache(async (): Promise<SessionUser | null> => {
 		return null;
 	}
 });
+
+export async function requireUser(): Promise<SessionUser> {
+	const user = await getCurrentUser();
+	if (!user) redirect("/login");
+	return user;
+}
