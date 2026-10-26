@@ -3,6 +3,7 @@ name: Deploy
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   ci:
@@ -10,6 +11,7 @@ jobs:
 
   deploy:
     needs: ci
+    if: github.ref == 'refs/heads/main'
     runs-on: self-hosted
 
     steps:
