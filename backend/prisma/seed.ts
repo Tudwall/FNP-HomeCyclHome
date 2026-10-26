@@ -28,6 +28,38 @@ async function main() {
     },
   });
 
+  const BIKE_TYPES = ['VTT', 'Route', 'Ville', 'VTC', 'Gravel', 'Electrique'];
+
+  const BIKE_CATALOG: Record<string, string[]> = {
+    Trek: ['Marlin 5', 'Domane AL 2', 'FX 2'],
+    Specialized: ['Rockhopper', 'Allez', 'Sirrus'],
+    Giant: ['Talon 3', 'Contend 2', 'Escape 3'],
+  };
+
+  for (const name of BIKE_TYPES) {
+    await prisma.bikeType.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
+
+  for (const [brandName, modelNames] of Object.entries(BIKE_CATALOG)) {
+    const brand = await prisma.bikeBrand.upsert({
+      where: { name: brandName },
+      update: {},
+      create: { name: brandName },
+    });
+
+    for (const modelName of modelNames) {
+      await prisma.bikeModel.upsert({
+        where: { brandId_name: { brandId: brand.id, name: modelName } },
+        update: {},
+        create: { name: modelName, brandId: brand.id },
+      });
+    }
+  }
+
   console.log(user);
 }
 

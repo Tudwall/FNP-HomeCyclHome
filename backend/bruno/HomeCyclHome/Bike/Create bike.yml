@@ -1,0 +1,26 @@
+info:
+  name: Create bike
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:3000/bikes
+  body:
+    type: json
+    data: |-
+      {
+        "bikeModelId": 1,
+        "typeId": 1
+      }
+
+runtime:
+  scripts:
+    - type: after-response
+      code: bru.setVar("bikeId", res.body.id);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

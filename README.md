@@ -42,3 +42,7 @@ docker compose -f docker-compose.dev.yml exec backend npx prisma db seed
 ```bash
 docker compose up -d
 ```
+
+#### CI/CD
+
+Pipeline effectuée avec Github Actions.
