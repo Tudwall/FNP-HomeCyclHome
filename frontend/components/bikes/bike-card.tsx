@@ -2,8 +2,6 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import type { Bike } from "@/lib/bikes";
 
-// Formaté côté serveur : sans fuseau explicite, on hériterait de celui de la
-// machine (UTC en conteneur) et une date proche de minuit changerait de jour.
 const dateFormat = new Intl.DateTimeFormat("fr-FR", {
 	dateStyle: "long",
 	timeZone: "Europe/Paris",

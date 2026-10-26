@@ -8,7 +8,6 @@ import { EmptyBikes } from "@/components/bikes/empty-bikes";
 export const metadata: Metadata = { title: "Mes vélos" };
 
 export default async function BikesPage() {
-	// Séquentiel : un 401 sur /bikes ne doit pas devancer la redirection.
 	await requireUser();
 	const bikes = await getMyBikes();
 
