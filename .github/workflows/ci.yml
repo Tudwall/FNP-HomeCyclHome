@@ -28,6 +28,7 @@ jobs:
         ports:
           - 5432
         options: >-
+          --tmpfs /var/lib/postgresql/data
           --health-cmd "pg_isready -U test -d homecyclhome_test"
           --health-interval 5s
           --health-timeout 5s
@@ -73,6 +74,11 @@ jobs:
       - name: e2e tests
         run: npm run test:e2e
 
+      - name: Clean workspace
+        if: always()
+        working-directory: ${{ github.workspace }}
+        run: git clean -ffdx || true
+
   frontend:
     runs-on: self-hosted
     defaults:
@@ -102,3 +108,8 @@ jobs:
         env:
           API_URL: http://localhost:3000
         run: npm run build
+
+      - name: Clean workspace
+        if: always()
+        working-directory: ${{ github.workspace }}
+        run: git clean -ffdx || true
