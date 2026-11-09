@@ -14,8 +14,9 @@ function parseBike(formData: FormData) {
 	});
 }
 
-export async function createBikeAction(
-	_prev: FormState,
+async function saveBike(
+	path: string,
+	method: "POST" | "PATCH",
 	formData: FormData,
 ): Promise<FormState> {
 	const parsed = parseBike(formData);
@@ -24,16 +25,44 @@ export async function createBikeAction(
 	}
 
 	try {
-		await apiFetch("/bikes", { method: "POST", body: parsed.data });
+		await apiFetch(path, { method, body: parsed.data });
 	} catch (error) {
 		if (error instanceof ApiError) {
-			if (error.status === 401) redirect("/login");
+			if (error.status === 401) redirect("/connexion");
 			return {
 				message:
 					"Impossible d'enregistrer ce vélo. Vérifiez votre sélection et réessayez.",
 			};
 		}
 		throw error;
+	}
+
+	revalidatePath("/mon-compte/velos");
+	redirect("/mon-compte/velos");
+}
+
+export async function createBikeAction(
+	_prev: FormState,
+	formData: FormData,
+): Promise<FormState> {
+	return saveBike("/bikes", "POST", formData);
+}
+
+export async function updateBikeAction(
+	id: number,
+	_prev: FormState,
+	formData: FormData,
+): Promise<FormState> {
+	return saveBike(`/bikes/${id}`, "PATCH", formData);
+}
+
+export async function deleteBikeAction(id: number) {
+	try {
+		await apiFetch(`/bikes/${id}`, { method: "DELETE" });
+	} catch (error) {
+		if (error instanceof ApiError && error.status === 401)
+			redirect("/connexion");
+		if (!(error instanceof ApiError && error.status === 404)) throw error;
 	}
 
 	revalidatePath("/mon-compte/velos");
