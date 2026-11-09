@@ -54,13 +54,13 @@ export async function SiteHeader() {
 					) : (
 						<div className="hidden items-center gap-2 md:flex">
 							<Link
-								href="/login"
+								href="/connexion"
 								className="rounded-md px-4 py-2 text-sm font-medium text-navy transition-colors hover:text-brand"
 							>
 								Se connecter
 							</Link>
 							<Link
-								href="/signup"
+								href="/inscription"
 								className="rounded-md border border-navy/20 px-4 py-2 text-sm font-semibold text-navy transition-colors hover:border-brand hover:text-brand"
 							>
 								Créer un compte

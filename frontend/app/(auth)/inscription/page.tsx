@@ -24,7 +24,7 @@ export default function SignupPage() {
 			</p>
 			<p className="mt-2 text-center">
 				<Link
-					href="/login"
+					href="/connexion"
 					className="inline-flex items-center gap-2 text-sm font-bold text-navy transition-colors hover:text-brand"
 				>
 					Se connecter
