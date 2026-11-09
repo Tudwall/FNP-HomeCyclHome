@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
-const PROTECTED = ["/dashboard", "/mon-compte"];
+const PROTECTED = ["/mon-compte"];
 const GUEST_ONLY = ["/connexion", "/inscription"];
 
 export function proxy(request: NextRequest) {
