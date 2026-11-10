@@ -33,7 +33,7 @@ export function ErrorFallback({ error, unstable_retry }: ErrorFallbackProps) {
 						href="/"
 						className="inline-flex items-center rounded-md border border-navy/20 px-4 py-2 text-sm font-semibold text-navy transition-colors hover:border-brand hover:text-brand"
 					>
-						Retour à l'accueil
+						Retour à l&apos;accueil
 					</Link>
 				</div>
 				{error.digest && (

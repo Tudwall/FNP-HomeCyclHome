@@ -8,7 +8,7 @@ export default function BikeNotFound() {
 				Vélo introuvable
 			</h1>
 			<p className="mt-2 text-sm text-navy/70">
-				Ce vélo n'existe pas ou a été supprimé.
+				Ce vélo n&apos;existe pas ou a été supprimé.
 			</p>
 			<Link
 				href="/mon-compte/velos"

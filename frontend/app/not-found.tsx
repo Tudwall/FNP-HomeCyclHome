@@ -16,14 +16,14 @@ export default function NotFound() {
 						Page introuvable
 					</h1>
 					<p className="mt-2 text-sm text-navy/70">
-						Cette page n'existe pas ou a été déplacée.
+						Cette page n&apos;existe pas ou a été déplacée.
 					</p>
 					<Link
 						href="/"
 						className="mt-8 inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors"
 					>
 						<ArrowLeft size={16} aria-hidden="true" />
-						Retour à l'accueil
+						Retour à l&apos;accueil
 					</Link>
 				</div>
 			</main>

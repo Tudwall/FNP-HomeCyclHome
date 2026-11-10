@@ -19,7 +19,7 @@ export function DeleteBikeForm({ action }: { action: () => Promise<void> }) {
 			<div>
 				<p className="font-heading font-bold text-navy">Supprimer ce vélo</p>
 				<p className="mt-1 text-sm text-navy/60">
-					Il n'apparaitra plus dans la liste de vos vélos.
+					Il n&apos;apparaitra plus dans la liste de vos vélos.
 				</p>
 			</div>
 			<DeleteButton />
