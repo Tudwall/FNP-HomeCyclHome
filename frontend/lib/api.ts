@@ -33,12 +33,20 @@ async function request(
 		if (token) h.set("Cookie", `access_token=${token}`);
 	}
 
-	const res = await fetch(`${apiUrl()}${path}`, {
-		cache: "no-store",
-		...init,
-		headers: h,
-		body: body === undefined ? undefined : JSON.stringify(body),
-	});
+	let res: Response;
+	try {
+		res = await fetch(`${apiUrl()}${path}`, {
+			cache: "no-store",
+			...init,
+			headers: h,
+			body: body === undefined ? undefined : JSON.stringify(body),
+		});
+	} catch (error) {
+		console.error(`API injoignable sur ${path}`, error);
+		throw new ApiError(503, [
+			"Service momentanément indisponible, réessayez dans un instant.",
+		]);
+	}
 
 	if (!res.ok) {
 		const payload = (await res.json().catch(() => null)) as {
