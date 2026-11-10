@@ -85,6 +85,30 @@ describe('Users & Auth (e2e)', () => {
         .send({ email: 'not-an-email', password: 'short' })
         .expect(400);
     });
+
+    it('prénom vide -> 400', async () => {
+      await request(server)
+        .post('/auth/signup')
+        .send({
+          email: 'e2e-empty@test.fr',
+          password,
+          firstName: '',
+          lastName: 'B',
+        })
+        .expect(400);
+    });
+
+    it("nom composé uniquement d'espaces -> 400 (trim)", async () => {
+      await request(server)
+        .post('/auth/signup')
+        .send({
+          email: 'e2e-empty@test.fr',
+          password,
+          firstName: 'A',
+          lastName: '    ',
+        })
+        .expect(400);
+    });
   });
 
   describe('POST /auth/login', () => {
@@ -199,6 +223,18 @@ describe('Users & Auth (e2e)', () => {
         .post('/auth/login')
         .send({ email, password })
         .expect(401);
+    });
+
+    it('PATCH prénom vide -> 400 et le prénom reste inchangé', async () => {
+      const agent = await agentFor(loginEmail);
+
+      await agent
+        .patch(`/users/${loginId}`)
+        .send({ firstName: '' })
+        .expect(400);
+
+      const me = await agent.get('/auth/me').expect(200);
+      expect(me.body).toMatchObject({ firstName: 'A' });
     });
   });
 });

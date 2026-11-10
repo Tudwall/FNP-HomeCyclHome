@@ -11,3 +11,5 @@ coverage
 .gitignore
 *.log
 bruno
+
+src/generated

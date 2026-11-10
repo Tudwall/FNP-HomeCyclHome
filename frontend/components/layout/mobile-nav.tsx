@@ -59,14 +59,14 @@ export function MobileNav({
 						) : (
 							<>
 								<Link
-									href="/login"
+									href="/connexion"
 									onClick={() => setIsOpen(false)}
 									className="text-sm font-medium text-navy"
 								>
 									Se connecter
 								</Link>
 								<Link
-									href="/signup"
+									href="/inscription"
 									onClick={() => setIsOpen(false)}
 									className="text-sm font-semibold text-navy"
 								>

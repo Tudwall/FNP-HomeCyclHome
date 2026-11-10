@@ -27,7 +27,7 @@ export default async function LoginPage({
 			<p className="text-center text-sm text-navy/70">
 				Vous n&apos;avez pas encore de compte ?{" "}
 				<Link
-					href="/signup"
+					href="/inscription"
 					className="font-medium text-navy underline underline-offset-2 hover:text-brand"
 				>
 					Créer un compte
