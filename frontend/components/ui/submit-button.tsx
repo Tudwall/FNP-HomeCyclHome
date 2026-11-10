@@ -14,7 +14,7 @@ export function SubmitButton({ children }: { children: ReactNode }) {
 			className="flex w-full items-center justify-center gap-3 rounded-sm bg-brand px-5 py-4 text-sm font-semibold uppercase tracking-widest text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
 		>
 			{pending ? (
-				"Un instant…"
+				"Un instant..."
 			) : (
 				<>
 					{children}

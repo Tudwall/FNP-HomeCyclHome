@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 
-const PROTECTED = ["/dashboard", "/mon-compte"];
-const GUEST_ONLY = ["/login", "/signup"];
+const PROTECTED = ["/mon-compte"];
+const GUEST_ONLY = ["/connexion", "/inscription"];
 
 export function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 	const hasSession = request.cookies.has("access_token");
 
 	if (!hasSession && PROTECTED.some((p) => pathname.startsWith(p))) {
-		const url = new URL("/login", request.url);
+		const url = new URL("/connexion", request.url);
 		url.searchParams.set("next", pathname);
 		return NextResponse.redirect(url);
 	}
