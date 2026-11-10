@@ -35,7 +35,7 @@ model Bike {
   createdOn    DateTime       @default(now()) @map("created_on") @db.Timestamp(6)
   updatedOn    DateTime?      @updatedAt @map("updated_on") @db.Timestamp(6)
   deletedOn    DateTime?      @map("deleted_on") @db.Timestamp(6)
-  bikeModelId  Int            @map("id_1")
+  bikeModelId  Int            @map("bike_model_id")
   userId       Int            @map("user_id")
   typeId       Int            @map("type_id")
   bikeModel    BikeModel      @relation(fields: [bikeModelId], references: [id], onDelete: NoAction, onUpdate: NoAction)
