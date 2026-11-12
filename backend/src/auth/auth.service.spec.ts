@@ -4,12 +4,21 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let users: { findByEmail: jest.Mock; create: jest.Mock };
+  let users: {
+    findByEmail: jest.Mock;
+    create: jest.Mock;
+    findCredentialsById: jest.Mock;
+    updatePassword: jest.Mock;
+  };
   let jwt: { signAsync: jest.Mock };
 
   const dto: CreateUserDto = {
@@ -20,7 +29,12 @@ describe('AuthService', () => {
   };
 
   beforeEach(async () => {
-    users = { findByEmail: jest.fn(), create: jest.fn() };
+    users = {
+      findByEmail: jest.fn(),
+      create: jest.fn(),
+      findCredentialsById: jest.fn(),
+      updatePassword: jest.fn(),
+    };
     jwt = { signAsync: jest.fn() };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -116,6 +130,54 @@ describe('AuthService', () => {
         accessToken: 'signed-token',
         user: { id: 7, email: loginDto.email },
       });
+    });
+  });
+
+  describe('changePassword', () => {
+    const pwdDto = {
+      currentPassword: 'old-password',
+      newPassword: 'new-password',
+    };
+
+    it('rejette si le user est introuvable, sans comparer ou écrire', async () => {
+      users.findCredentialsById.mockResolvedValue(null);
+
+      await expect(service.changePassword(7, pwdDto)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      expect(bcrypt.compare).not.toHaveBeenCalled();
+      expect(users.updatePassword).not.toHaveBeenCalled();
+    });
+
+    it('rejette si le mot de passe actuel ne matche pas, sans écrire', async () => {
+      users.findCredentialsById.mockResolvedValue({
+        id: 7,
+        password: 'old-hash',
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(service.changePassword(7, pwdDto)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+      expect(bcrypt.hash).not.toHaveBeenCalled();
+      expect(users.updatePassword).not.toHaveBeenCalled();
+    });
+
+    it('hash le nouveau mot de passe et le sauvegarde', async () => {
+      users.findCredentialsById.mockResolvedValue({
+        id: 7,
+        password: 'old-hash',
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hash');
+      users.updatePassword.mockResolvedValue({ id: 7 });
+
+      await expect(service.changePassword(7, pwdDto)).resolves.toBeUndefined();
+
+      expect(users.findCredentialsById).toHaveBeenCalledWith(7);
+      expect(bcrypt.compare).toHaveBeenCalledWith('old-password', 'old-hash');
+      expect(bcrypt.hash).toHaveBeenCalledWith('new-password', 10);
+      expect(users.updatePassword).toHaveBeenCalledWith(7, 'new-hash');
     });
   });
 });

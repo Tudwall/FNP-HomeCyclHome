@@ -47,4 +47,19 @@ export class UsersService {
       omit: { password: true },
     });
   }
+
+  findCredentialsById(id: number) {
+    return this.prisma.appUser.findUnique({
+      where: { id, deletedOn: null },
+      select: { id: true, password: true },
+    });
+  }
+
+  updatePassword(id: number, password: string) {
+    return this.prisma.appUser.update({
+      where: { id, deletedOn: null },
+      data: { password },
+      select: { id: true },
+    });
+  }
 }
