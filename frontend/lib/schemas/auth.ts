@@ -1,22 +1,13 @@
 import { z } from "zod";
+import { profileSchema } from "./profile";
 
 export const loginSchema = z.object({
 	email: z.email("Adresse email invalide"),
 	password: z.string().min(1, "Mot de passe requis"),
 });
 
-export const signupSchema = z
-	.object({
-		firstName: z
-			.string()
-			.trim()
-			.min(1, "Prénom requis")
-			.max(100, "100 caractères maximum"),
-		lastName: z
-			.string()
-			.trim()
-			.min(1, "Nom requis")
-			.max(100, "100 caractères maximum"),
+export const signupSchema = profileSchema
+	.extend({
 		email: z.email("Adresse email invalide").max(255, "255 caractères maximum"),
 		password: z
 			.string()
