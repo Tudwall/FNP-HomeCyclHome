@@ -208,6 +208,11 @@ describe('Users & Auth (e2e)', () => {
         .send({ password: 'newpassword' })
         .expect(400);
 
+      await agent
+        .patch(`/users/${id}`)
+        .send({ email: 'e2e-hijack@test.com' })
+        .expect(400);
+
       await agent.delete(`/users/${id}`).expect(200);
       await agent.delete(`/users/${id}`).expect(404);
       await agent.patch(`/users/${id}`).send({ firstName: 'X' }).expect(404);
