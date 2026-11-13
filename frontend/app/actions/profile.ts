@@ -7,7 +7,8 @@ import { profileSchema } from "@/lib/schemas/profile";
 import { ApiError, apiFetch } from "@/lib/api";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { changePasswordSchema } from "@/lib/schemas/auth";
+import { changePasswordSchema, deleteAccountSchema } from "@/lib/schemas/auth";
+import { cookies } from "next/headers";
 
 export async function updateProfileAction(
 	_prev: FormState,
@@ -74,4 +75,36 @@ export async function changePasswordAction(
 	}
 
 	return { success: "Mot de passe modifié." };
+}
+
+export async function deleteAccountAction(
+	_prev: FormState,
+	formData: FormData,
+): Promise<FormState> {
+	const parsed = deleteAccountSchema.safeParse({
+		password: formData.get("password"),
+	});
+	if (!parsed.success) {
+		return { errors: z.flattenError(parsed.error).fieldErrors };
+	}
+
+	try {
+		await apiFetch("/auth/account", { method: "DELETE", body: parsed.data });
+	} catch (error) {
+		if (error instanceof ApiError) {
+			if (error.status === 401) redirect("/connexion");
+			if (error.status === 403) {
+				return { errors: { password: ["Mot de passe incorrect."] } };
+			}
+			if (error.status === 429) {
+				return { message: "Trop de tentatives. Réessayez dans une minute." };
+			}
+			return { message: "Impossible de supprimer votre compte. Réessayez." };
+		}
+		throw error;
+	}
+
+	(await cookies()).delete("access_token");
+	revalidatePath("/", "layout");
+	redirect("/");
 }

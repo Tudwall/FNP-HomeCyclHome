@@ -41,3 +41,10 @@ export const signupSchema = profileSchema
 	});
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
+
+export const deleteAccountSchema = z.object({
+	password: z
+		.string()
+		.min(1, "Mot de passe requis")
+		.max(72, "72 caractères maximum."),
+});

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { requireUser } from "@/lib/session";
 import { ProfileForm } from "@/components/account/profile-form";
 import { PasswordForm } from "@/components/account/password-form";
+import { DeleteAccountForm } from "@/components/account/delete-account-form";
 
 export const metadata: Metadata = { title: "Mon profil" };
 
@@ -33,6 +34,7 @@ export default async function ProfilePage() {
 				</h2>
 				<PasswordForm />
 			</div>
+			<DeleteAccountForm />
 		</section>
 	);
 }
