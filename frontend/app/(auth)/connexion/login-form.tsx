@@ -7,6 +7,7 @@ import { loginAction, type FormState } from "@/app/actions/auth";
 import { Field } from "@/components/ui/field";
 import { PasswordField } from "@/components/ui/password-field";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { FormFeedback } from "@/components/ui/form-feedback";
 
 const INITIAL_STATE: FormState = {};
 
@@ -17,14 +18,7 @@ export function LoginForm({ next }: { next?: string }) {
 		<form action={formAction} className="mt-8 space-y-6">
 			{next && <input type="hidden" name="next" value={next} />}
 
-			{state.message && (
-				<p
-					role="alert"
-					className="rounded-sm bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
-				>
-					{state.message}
-				</p>
-			)}
+			<FormFeedback error={state.message} />
 
 			<Field
 				label="Adresse e-mail"

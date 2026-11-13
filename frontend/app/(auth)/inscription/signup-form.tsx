@@ -7,6 +7,7 @@ import { signupAction, type FormState } from "@/app/actions/auth";
 import { Field } from "@/components/ui/field";
 import { PasswordField } from "@/components/ui/password-field";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { FormFeedback } from "@/components/ui/form-feedback";
 
 const INITIAL_STATE: FormState = {};
 
@@ -15,14 +16,7 @@ export function SignupForm() {
 
 	return (
 		<form action={formAction} className="mt-8 space-y-6">
-			{state.message && (
-				<p
-					role="alert"
-					className="rounded-sm bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
-				>
-					{state.message}
-				</p>
-			)}
+			<FormFeedback error={state.message} />
 
 			<div className="grid gap-6 sm:grid-cols-2">
 				<Field

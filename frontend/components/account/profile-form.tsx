@@ -5,6 +5,7 @@ import { updateProfileAction } from "@/app/actions/profile";
 import { useActionState, useState } from "react";
 import { Field } from "../ui/field";
 import { SubmitButton } from "../ui/submit-button";
+import { FormFeedback } from "../ui/form-feedback";
 
 type ProfileFormProps = {
 	defaultValues: { firstName: string; lastName: string };
@@ -22,22 +23,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
 
 	return (
 		<form action={formAction} className="mt-6 space-y-6">
-			{state.message && (
-				<p
-					role="alert"
-					className="rounded-sm bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
-				>
-					{state.message}
-				</p>
-			)}
-			{state.success && (
-				<p
-					role="status"
-					className="rounded-sm bg-green-50 px-3 py-2 text-sm font-medium text-green-700"
-				>
-					{state.success}
-				</p>
-			)}
+			<FormFeedback error={state.message} success={state.success} />
 
 			<div className="grid gap-6 sm:grid-cols-2">
 				<Field
