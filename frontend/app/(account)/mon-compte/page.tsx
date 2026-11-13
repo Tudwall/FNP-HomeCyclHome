@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/session";
 import { ProfileForm } from "@/components/account/profile-form";
+import { PasswordForm } from "@/components/account/password-form";
 
 export const metadata: Metadata = { title: "Mon profil" };
 
@@ -24,6 +25,13 @@ export default async function ProfilePage() {
 			<div className="mt-6 bg-white p-6 shadow-sm">
 				<h2 className="font-heading text-lg font-bold text-navy">Email</h2>
 				<p className="mt-2 font-medium">{user.email}</p>
+			</div>
+
+			<div className="mt-6 bg-white p-6 shadow-sm">
+				<h2 className="font-heading text-lg font-bold text-navy">
+					Mot de passe
+				</h2>
+				<PasswordForm />
 			</div>
 		</section>
 	);
