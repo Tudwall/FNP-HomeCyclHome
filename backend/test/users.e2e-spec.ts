@@ -192,6 +192,63 @@ describe('Users & Auth (e2e)', () => {
     });
   });
 
+  describe('PATCH /auth/password', () => {
+    const pwdEmail = 'e2e-pwd@test.fr';
+    const newPassword = 'newpassword456';
+
+    beforeAll(async () => {
+      await signup(pwdEmail);
+    });
+
+    it('sans cookie -> 401', async () => {
+      await request(server)
+        .patch('/auth/password')
+        .send({ currentPassword: password, newPassword })
+        .expect(401);
+    });
+
+    it('mot de passe actuel faux -> 403 et le mot de passe reste inchangé', async () => {
+      const agent = await agentFor(pwdEmail);
+      await agent
+        .patch('/auth/password')
+        .send({ currentPassword: 'wrongpwd', newPassword })
+        .expect(403);
+
+      await request(server)
+        .post('/auth/login')
+        .send({ email: pwdEmail, password })
+        .expect(200);
+    });
+
+    it('nouveau mot de passe trop court -> 400', async () => {
+      const agent = await agentFor(pwdEmail);
+      await agent
+        .patch('/auth/password')
+        .send({ currentPassword: password, newPassword: 'short' })
+        .expect(400);
+    });
+
+    it('OK -> 204, l’ancien mot de passe ne marche plus, le nouveau oui', async () => {
+      const email = 'e2e-pwd-ok@test.fr';
+      await signup(email);
+      const agent = await agentFor(email);
+
+      await agent
+        .patch('/auth/password')
+        .send({ currentPassword: password, newPassword })
+        .expect(204);
+
+      await request(server)
+        .post('/auth/login')
+        .send({ email, password })
+        .expect(401);
+      await request(server)
+        .post('/auth/login')
+        .send({ email, password: newPassword })
+        .expect(200);
+    });
+  });
+
   describe('Cycle sur son propre compte (soft-delete)', () => {
     it('PATCH ok -> champ interdit 400 -> DELETE -> re-DELETE/PATCH 404', async () => {
       const email = 'e2e-cycle@test.fr';
@@ -206,6 +263,11 @@ describe('Users & Auth (e2e)', () => {
       await agent
         .patch(`/users/${id}`)
         .send({ password: 'newpassword' })
+        .expect(400);
+
+      await agent
+        .patch(`/users/${id}`)
+        .send({ email: 'e2e-hijack@test.com' })
         .expect(400);
 
       await agent.delete(`/users/${id}`).expect(200);

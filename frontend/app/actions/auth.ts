@@ -9,6 +9,7 @@ import { ApiError, apiFetch, apiLogin } from "@/lib/api";
 export type FormState = {
 	errors?: Record<string, string[] | undefined>;
 	message?: string;
+	success?: string;
 };
 
 const COOKIE_MAX_AGE = 60 * 60;

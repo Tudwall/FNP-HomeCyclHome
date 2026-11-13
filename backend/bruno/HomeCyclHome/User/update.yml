@@ -1,0 +1,21 @@
+info:
+  name: update
+  type: http
+  seq: 1
+
+http:
+  method: PATCH
+  url: http://localhost:3000/users/14
+  body:
+    type: json
+    data: |-
+      {
+        "email": "x@y.fr"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
