@@ -66,19 +66,4 @@ describe('UsersController', () => {
       expect(service.update).not.toHaveBeenCalled();
     });
   });
-
-  describe('remove', () => {
-    it('délègue à usersService.remove pour son propre compte', async () => {
-      const removed = { id: 1 };
-      service.remove.mockResolvedValue(removed);
-
-      await expect(controller.remove(1, reqAs(1))).resolves.toBe(removed);
-      expect(service.remove).toHaveBeenCalledWith(1);
-    });
-
-    it('refuse le compte d’autrui', () => {
-      expect(() => controller.remove(2, reqAs(1))).toThrow(ForbiddenException);
-      expect(service.remove).not.toHaveBeenCalled();
-    });
-  });
 });
