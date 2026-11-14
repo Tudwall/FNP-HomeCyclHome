@@ -135,4 +135,34 @@ describe('UsersService', () => {
       });
     });
   });
+
+  describe('findCredentialsById', () => {
+    it('ne sélectionne que id et password, en excluant les supprimés', async () => {
+      const credentials = { id: 1, password: 'hash' };
+      prisma.appUser.findUnique.mockResolvedValue(credentials);
+
+      const result = await service.findCredentialsById(1);
+
+      expect(prisma.appUser.findUnique).toHaveBeenCalledWith({
+        where: { id: 1, deletedOn: null },
+        select: { id: true, password: true },
+      });
+      expect(result).toBe(credentials);
+    });
+  });
+
+  describe('updatePassword', () => {
+    it('écrit le hash sur le user ciblé sans le renvoyer', async () => {
+      prisma.appUser.update.mockResolvedValue({ id: 1 });
+
+      const result = await service.updatePassword(1, 'new-hash');
+
+      expect(prisma.appUser.update).toHaveBeenCalledWith({
+        where: { id: 1, deletedOn: null },
+        data: { password: 'new-hash' },
+        select: { id: true },
+      });
+      expect(result).toEqual({ id: 1 });
+    });
+  });
 });
