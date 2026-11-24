@@ -4,7 +4,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   ParseIntPipe,
   ForbiddenException,
   Req,
