@@ -34,6 +34,8 @@ export class AuthController {
   ) {}
 
   @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
   signup(@Body() dto: CreateUserDto) {
