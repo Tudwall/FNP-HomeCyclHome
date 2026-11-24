@@ -10,6 +10,7 @@ import {
   UnauthorizedException,
   UseGuards,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
@@ -21,6 +22,7 @@ import { UsersService } from 'src/users/users.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import type { AuthUser } from './decorators/current-user.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 
 const SESSION_MAX_AGE_MS = 1000 * 60 * 60;
 
@@ -32,6 +34,8 @@ export class AuthController {
   ) {}
 
   @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
   signup(@Body() dto: CreateUserDto) {
@@ -90,5 +94,13 @@ export class AuthController {
     @Body() dto: ChangePasswordDto,
   ) {
     return this.authService.changePassword(user.userId, dto);
+  }
+
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Delete('account')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteAccount(@CurrentUser() user: AuthUser, @Body() dto: DeleteAccountDto) {
+    return this.authService.deleteAccount(user.userId, dto);
   }
 }

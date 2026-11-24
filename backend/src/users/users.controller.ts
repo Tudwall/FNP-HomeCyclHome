@@ -4,7 +4,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   ParseIntPipe,
   ForbiddenException,
   Req,
@@ -38,11 +37,5 @@ export class UsersController {
   ) {
     this.assertSelf(req, id);
     return this.usersService.update(id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number, @Req() req: Request) {
-    this.assertSelf(req, id);
-    return this.usersService.remove(id);
   }
 }

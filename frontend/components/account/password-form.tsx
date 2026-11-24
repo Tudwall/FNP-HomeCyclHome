@@ -5,6 +5,7 @@ import type { FormState } from "@/app/actions/auth";
 import { changePasswordAction } from "@/app/actions/profile";
 import { PasswordField } from "@/components/ui/password-field";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { FormFeedback } from "../ui/form-feedback";
 
 const INITIAL_STATE: FormState = {};
 
@@ -16,22 +17,7 @@ export function PasswordForm() {
 
 	return (
 		<form action={formAction} className="mt-6 space-y-6">
-			{state.message && (
-				<p
-					role="alert"
-					className="rounded-sm bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
-				>
-					{state.message}
-				</p>
-			)}
-			{state.success && (
-				<p
-					role="status"
-					className="rounded-sm bg-green-50 px-3 py-2 text-sm font-medium text-green-700"
-				>
-					{state.success}
-				</p>
-			)}
+			<FormFeedback error={state.message} success={state.success} />
 
 			<PasswordField
 				label="Mot de passe actuel"
