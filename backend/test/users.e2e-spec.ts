@@ -148,8 +148,8 @@ describe('Users & Auth (e2e)', () => {
     });
   });
 
-  describe('GET /users (annuaire retiré tant qu’il n’y a pas de RBAC)', () => {
-    it('la route n’existe plus -> 404', async () => {
+  describe("GET /users (annuaire retiré tant qu'il n'y a pas de RBAC)", () => {
+    it("la route n'existe plus -> 404", async () => {
       const agent = await agentFor(loginEmail);
       await agent.get('/users').expect(404);
     });
@@ -166,7 +166,7 @@ describe('Users & Auth (e2e)', () => {
       expect(res.body).not.toHaveProperty('password');
     });
 
-    it('le compte d’autrui -> 403', async () => {
+    it("le compte d'autrui -> 403", async () => {
       const agent = await agentFor(loginEmail);
       await agent.get(`/users/${otherId}`).expect(403);
     });
@@ -177,7 +177,7 @@ describe('Users & Auth (e2e)', () => {
     });
   });
 
-  describe('PATCH / DELETE sur le compte d’autrui', () => {
+  describe("PATCH sur le compte d'autrui", () => {
     it('PATCH -> 403', async () => {
       const agent = await agentFor(loginEmail);
       await agent
@@ -186,9 +186,11 @@ describe('Users & Auth (e2e)', () => {
         .expect(403);
     });
 
-    it('DELETE -> 403', async () => {
-      const agent = await agentFor(loginEmail);
-      await agent.delete(`/users/${otherId}`).expect(403);
+    it("DELETE /users/:id n'existe plus -> 404", async () => {
+      const email = 'e2e-old-delete@test.fr';
+      const id = await signup(email);
+      const agent = await agentFor(email);
+      await agent.delete(`/users/${id}`).expect(404);
     });
   });
 
@@ -228,7 +230,7 @@ describe('Users & Auth (e2e)', () => {
         .expect(400);
     });
 
-    it('OK -> 204, l’ancien mot de passe ne marche plus, le nouveau oui', async () => {
+    it("OK -> 204, l'ancien mot de passe ne marche plus, le nouveau oui", async () => {
       const email = 'e2e-pwd-ok@test.fr';
       await signup(email);
       const agent = await agentFor(email);
@@ -249,8 +251,48 @@ describe('Users & Auth (e2e)', () => {
     });
   });
 
+  describe('DELETE /auth/account', () => {
+    it('sans cookie -> 401', async () => {
+      await request(server)
+        .delete('/auth/account')
+        .send({ password })
+        .expect(401);
+    });
+
+    it('mauvais mot de passe -> 403 et le compte existe toujours', async () => {
+      const email = 'e2e-del-ko@test.fr';
+      await signup(email);
+      const agent = await agentFor(email);
+
+      await agent
+        .delete('/auth/account')
+        .send({ password: 'wrongpwd' })
+        .expect(403);
+
+      await request(server)
+        .post('/auth/login')
+        .send({ email, password })
+        .expect(200);
+    });
+
+    it('OK -> 204, plus de connexion, session invalide, re-suppression 403', async () => {
+      const email = 'e2e-del-ok@test.fr';
+      await signup(email);
+      const agent = await agentFor(email);
+
+      await agent.delete('/auth/account').send({ password }).expect(204);
+
+      await request(server)
+        .post('/auth/login')
+        .send({ email, password })
+        .expect(401);
+      await agent.get('/auth/me').expect(401);
+      await agent.delete('/auth/account').send({ password }).expect(403);
+    });
+  });
+
   describe('Cycle sur son propre compte (soft-delete)', () => {
-    it('PATCH ok -> champ interdit 400 -> DELETE -> re-DELETE/PATCH 404', async () => {
+    it('PATCH ok -> champs interdits 400 -> suppression -> PATCH 404', async () => {
       const email = 'e2e-cycle@test.fr';
       const id = await signup(email);
       const agent = await agentFor(email);
@@ -270,21 +312,8 @@ describe('Users & Auth (e2e)', () => {
         .send({ email: 'e2e-hijack@test.com' })
         .expect(400);
 
-      await agent.delete(`/users/${id}`).expect(200);
-      await agent.delete(`/users/${id}`).expect(404);
+      await agent.delete('/auth/account').send({ password }).expect(204);
       await agent.patch(`/users/${id}`).send({ firstName: 'X' }).expect(404);
-    });
-
-    it('un compte soft-supprimé ne peut plus se connecter', async () => {
-      const email = 'e2e-deleted@test.fr';
-      const id = await signup(email);
-      const agent = await agentFor(email);
-      await agent.delete(`/users/${id}`).expect(200);
-
-      await request(server)
-        .post('/auth/login')
-        .send({ email, password })
-        .expect(401);
     });
 
     it('PATCH prénom vide -> 400 et le prénom reste inchangé', async () => {

@@ -18,6 +18,7 @@ describe('AuthService', () => {
     create: jest.Mock;
     findCredentialsById: jest.Mock;
     updatePassword: jest.Mock;
+    remove: jest.Mock;
   };
   let jwt: { signAsync: jest.Mock };
 
@@ -34,6 +35,7 @@ describe('AuthService', () => {
       create: jest.fn(),
       findCredentialsById: jest.fn(),
       updatePassword: jest.fn(),
+      remove: jest.fn(),
     };
     jwt = { signAsync: jest.fn() };
 
@@ -178,6 +180,39 @@ describe('AuthService', () => {
       expect(bcrypt.compare).toHaveBeenCalledWith('old-password', 'old-hash');
       expect(bcrypt.hash).toHaveBeenCalledWith('new-password', 10);
       expect(users.updatePassword).toHaveBeenCalledWith(7, 'new-hash');
+    });
+  });
+
+  describe('deleteAccount', () => {
+    it('rejette si le user est introuvable, sans supprimer', async () => {
+      users.findCredentialsById.mockResolvedValue(null);
+
+      await expect(
+        service.deleteAccount(7, { password: 'plaintext' }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(users.remove).not.toHaveBeenCalled();
+    });
+    it('rejette si le mot de passe ne matche pas, sans supprimer', async () => {
+      users.findCredentialsById.mockResolvedValue({ id: 7, password: 'hash' });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        service.deleteAccount(7, { password: 'wrong' }),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(users.remove).not.toHaveBeenCalled();
+    });
+
+    it('supprime le compte quand le mot de passe est bon', async () => {
+      users.findCredentialsById.mockResolvedValue({ id: 7, password: 'hash' });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      users.remove.mockResolvedValue({ id: 7 });
+
+      await expect(
+        service.deleteAccount(7, { password: 'plaintext' }),
+      ).resolves.toBeUndefined();
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('plaintext', 'hash');
+      expect(users.remove).toHaveBeenCalledWith(7);
     });
   });
 });

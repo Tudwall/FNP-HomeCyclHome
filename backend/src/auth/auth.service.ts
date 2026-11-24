@@ -10,6 +10,7 @@ import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 
 @Injectable()
 export class AuthService {
@@ -48,13 +49,21 @@ export class AuthService {
     return { accessToken, user: { id: user.id, email: user.email } };
   }
 
-  async changePassword(userId: number, dto: ChangePasswordDto) {
+  private async assertPassword(userId: number, password: string) {
     const user = await this.appUser.findCredentialsById(userId);
-    if (!user || !(await bcrypt.compare(dto.currentPassword, user.password))) {
-      throw new ForbiddenException('Mot de passe incorrect');
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new ForbiddenException('Mot de passe incorrect.');
     }
+  }
 
+  async changePassword(userId: number, dto: ChangePasswordDto) {
+    await this.assertPassword(userId, dto.currentPassword);
     const hash = await bcrypt.hash(dto.newPassword, this.SALT_ROUNDS);
     await this.appUser.updatePassword(userId, hash);
+  }
+
+  async deleteAccount(userId: number, dto: DeleteAccountDto) {
+    await this.assertPassword(userId, dto.password);
+    await this.appUser.remove(userId);
   }
 }

@@ -5,6 +5,7 @@ import type { FormState } from "@/app/actions/auth";
 import type { BikeBrand, BikeType } from "@/lib/catalog";
 import { SelectField } from "@/components/ui/select-field";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { FormFeedback } from "../ui/form-feedback";
 
 type BikeFormProps = {
 	action: (prev: FormState, formData: FormData) => Promise<FormState>;
@@ -34,14 +35,7 @@ export function BikeForm({
 
 	return (
 		<form action={formAction} className="mt-6 space-y-6 bg-white p-6 shadow-sm">
-			{state.message && (
-				<p
-					role="alert"
-					className="rounded-sm bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
-				>
-					{state.message}
-				</p>
-			)}
+			<FormFeedback error={state.message} />
 
 			<SelectField
 				id="brandId"
