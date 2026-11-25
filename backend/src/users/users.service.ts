@@ -59,6 +59,14 @@ export class UsersService {
         },
         select: { id: true },
       }),
+      this.prisma.address.updateMany({
+        where: { userId: id },
+        data: { number: null, street: 'Adresse supprimée' },
+      }),
+      this.prisma.address.updateMany({
+        where: { userId: id, deletedOn: null },
+        data: { deletedOn: now },
+      }),
     ]);
   }
 

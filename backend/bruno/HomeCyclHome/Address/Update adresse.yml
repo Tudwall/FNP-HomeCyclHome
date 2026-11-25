@@ -1,0 +1,25 @@
+info:
+  name: Update adresse
+  type: http
+  seq: 1
+
+http:
+  method: PUT
+  url: http://localhost:3000/address
+  body:
+    type: json
+    data: |-
+      {
+        "number": "3",
+        "street": "rue des champs",
+        "postalCode": "64410",
+        "locality": "Pau"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: true

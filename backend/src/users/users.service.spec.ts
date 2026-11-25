@@ -15,6 +15,9 @@ describe('UsersService', () => {
     bike: {
       updateMany: jest.Mock;
     };
+    address: {
+      updateMany: jest.Mock;
+    };
     $transaction: jest.Mock;
   };
 
@@ -27,6 +30,7 @@ describe('UsersService', () => {
         update: jest.fn(),
       },
       bike: { updateMany: jest.fn() },
+      address: { updateMany: jest.fn() },
       $transaction: jest.fn(),
     };
 
@@ -129,11 +133,16 @@ describe('UsersService', () => {
   });
 
   describe('anonymize', () => {
-    it('soft delete les vélos et écrase les données perso dans une transaction', async () => {
+    it('soft delete les vélos et adresses, écrase les données perso dans une transaction', async () => {
       const bikeOp = Symbol('bikeOp');
       const userOp = Symbol('userOp');
+      const addressScrubOp = Symbol('addressScrubOp');
+      const addressDeleteOp = Symbol('addressDeleteOp');
       prisma.bike.updateMany.mockReturnValue(bikeOp);
       prisma.appUser.update.mockReturnValue(userOp);
+      prisma.address.updateMany
+        .mockReturnValueOnce(addressScrubOp)
+        .mockReturnValueOnce(addressDeleteOp);
 
       await service.anonymize(1);
 
@@ -152,7 +161,20 @@ describe('UsersService', () => {
         },
         select: { id: true },
       });
-      expect(prisma.$transaction).toHaveBeenCalledWith([bikeOp, userOp]);
+      expect(prisma.address.updateMany).toHaveBeenNthCalledWith(1, {
+        where: { userId: 1 },
+        data: { number: null, street: 'Adresse supprimée' },
+      });
+      expect(prisma.address.updateMany).toHaveBeenNthCalledWith(2, {
+        where: { userId: 1, deletedOn: null },
+        data: { deletedOn: expect.any(Date) },
+      });
+      expect(prisma.$transaction).toHaveBeenCalledWith([
+        bikeOp,
+        userOp,
+        addressScrubOp,
+        addressDeleteOp,
+      ]);
     });
   });
 
