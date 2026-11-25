@@ -3,6 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { AppUser } from '../generated/prisma/client';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class UsersService {
@@ -40,12 +41,33 @@ export class UsersService {
     });
   }
 
-  remove(id: number) {
-    return this.prisma.appUser.update({
-      where: { id, deletedOn: null },
-      data: { deletedOn: new Date() },
-      omit: { password: true },
-    });
+  anonymize(id: number) {
+    const now = new Date();
+    return this.prisma.$transaction([
+      this.prisma.bike.updateMany({
+        where: { userId: id, deletedOn: null },
+        data: { deletedOn: now },
+      }),
+      this.prisma.appUser.update({
+        where: { id, deletedOn: null },
+        data: {
+          email: `deleted-${id}@invalid`,
+          firstName: 'Utilisateur',
+          lastName: 'supprimé',
+          password: randomBytes(32).toString('hex'),
+          deletedOn: now,
+        },
+        select: { id: true },
+      }),
+      this.prisma.address.updateMany({
+        where: { userId: id },
+        data: { number: null, street: 'Adresse supprimée' },
+      }),
+      this.prisma.address.updateMany({
+        where: { userId: id, deletedOn: null },
+        data: { deletedOn: now },
+      }),
+    ]);
   }
 
   findCredentialsById(id: number) {

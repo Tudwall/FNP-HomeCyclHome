@@ -64,6 +64,6 @@ export class AuthService {
 
   async deleteAccount(userId: number, dto: DeleteAccountDto) {
     await this.assertPassword(userId, dto.password);
-    await this.appUser.remove(userId);
+    await this.appUser.anonymize(userId);
   }
 }

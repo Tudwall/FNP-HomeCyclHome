@@ -32,6 +32,17 @@ describe('Users & Auth (e2e)', () => {
     return agent;
   }
 
+  async function cleanup() {
+    const testUsers = {
+      OR: [
+        { email: { contains: 'e2e-' } },
+        { email: { endsWith: '@invalid' } },
+      ],
+    };
+    await prisma.address.deleteMany({ where: { appUser: testUsers } });
+    await prisma.appUser.deleteMany({ where: testUsers });
+  }
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -43,14 +54,14 @@ describe('Users & Auth (e2e)', () => {
     server = app.getHttpServer();
 
     prisma = app.get(PrismaService);
-    await prisma.appUser.deleteMany({ where: { email: { contains: 'e2e-' } } });
+    await cleanup();
 
     loginId = await signup(loginEmail);
     otherId = await signup(otherEmail);
   });
 
   afterAll(async () => {
-    await prisma.appUser.deleteMany({ where: { email: { contains: 'e2e-' } } });
+    await cleanup();
     await app.close();
   });
 
@@ -277,22 +288,57 @@ describe('Users & Auth (e2e)', () => {
 
     it('OK -> 204, plus de connexion, session invalide, re-suppression 403', async () => {
       const email = 'e2e-del-ok@test.fr';
-      await signup(email);
+      const id = await signup(email);
       const agent = await agentFor(email);
 
+      await agent
+        .put('/address')
+        .send({
+          street: 'rue des Lilas',
+          postalCode: '35000',
+          locality: 'Rennes',
+        })
+        .expect(200);
+
       await agent.delete('/auth/account').send({ password }).expect(204);
+
+      const addresses = await prisma.address.findMany({
+        where: { userId: id },
+      });
+      expect(addresses).toHaveLength(1);
+      expect(addresses[0]).toMatchObject({
+        street: 'Adresse supprimée',
+        number: null,
+        postalCode: '35000',
+        deletedOn: expect.any(Date),
+      });
+
+      await agent.get('/bikes').expect(401);
 
       await request(server)
         .post('/auth/login')
         .send({ email, password })
         .expect(401);
       await agent.get('/auth/me').expect(401);
-      await agent.delete('/auth/account').send({ password }).expect(403);
+      await agent.delete('/auth/account').send({ password }).expect(401);
+
+      const old = await prisma.appUser.findFirst({
+        where: { email: `deleted-${id}@invalid` },
+      });
+      expect(old).toMatchObject({
+        firstName: 'Utilisateur',
+        deletedOn: expect.any(Date),
+      });
+
+      await request(server)
+        .post('/auth/signup')
+        .send({ email, password, firstName: 'A', lastName: 'B' })
+        .expect(201);
     });
   });
 
   describe('Cycle sur son propre compte (soft-delete)', () => {
-    it('PATCH ok -> champs interdits 400 -> suppression -> PATCH 404', async () => {
+    it('PATCH ok -> champs interdits 400 -> suppression -> PATCH 401', async () => {
       const email = 'e2e-cycle@test.fr';
       const id = await signup(email);
       const agent = await agentFor(email);
@@ -313,7 +359,7 @@ describe('Users & Auth (e2e)', () => {
         .expect(400);
 
       await agent.delete('/auth/account').send({ password }).expect(204);
-      await agent.patch(`/users/${id}`).send({ firstName: 'X' }).expect(404);
+      await agent.patch(`/users/${id}`).send({ firstName: 'X' }).expect(401);
     });
 
     it('PATCH prénom vide -> 400 et le prénom reste inchangé', async () => {

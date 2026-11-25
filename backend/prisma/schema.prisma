@@ -11,21 +11,21 @@ datasource db {
 }
 
 model AppUser {
-  id              Int                 @id @default(autoincrement())
-  email           String              @unique @db.VarChar(255)
-  password        String              @db.VarChar(255)
-  firstName       String              @map("first_name") @db.VarChar(100)
-  lastName        String              @map("last_name") @db.VarChar(100)
-  isActive        Boolean             @default(true) @map("is_active")
-  createdOn       DateTime            @default(now()) @map("created_on") @db.Timestamp(6)
-  updatedOn       DateTime?           @updatedAt @map("updated_on") @db.Timestamp(6)
-  deletedOn       DateTime?           @map("deleted_on") @db.Timestamp(6)
-  bikes           Bike[]
-  comment         comment[]
-  intervention    intervention[]
-  userFullAddress user_full_address[]
-  userPermission  user_permission[]
-  userRole        user_role[]
+  id             Int               @id @default(autoincrement())
+  email          String            @unique @db.VarChar(255)
+  password       String            @db.VarChar(255)
+  firstName      String            @map("first_name") @db.VarChar(100)
+  lastName       String            @map("last_name") @db.VarChar(100)
+  isActive       Boolean           @default(true) @map("is_active")
+  createdOn      DateTime          @default(now()) @map("created_on") @db.Timestamp(6)
+  updatedOn      DateTime?         @updatedAt @map("updated_on") @db.Timestamp(6)
+  deletedOn      DateTime?         @map("deleted_on") @db.Timestamp(6)
+  bikes          Bike[]
+  comment        comment[]
+  intervention   intervention[]
+  addresses      Address[]
+  userPermission user_permission[]
+  userRole       user_role[]
 
   @@map("app_user")
 }
@@ -47,8 +47,8 @@ model Bike {
 }
 
 model BikeBrand {
-  id        Int         @id @default(autoincrement())
-  name      String      @unique @map("brand_name") @db.VarChar(50)
+  id     Int         @id @default(autoincrement())
+  name   String      @unique @map("brand_name") @db.VarChar(50)
   models BikeModel[]
 
   @@map("bike_brand")
@@ -84,16 +84,16 @@ model comment {
 }
 
 model company_info {
-  id            Int          @id @default(autoincrement())
-  name          String       @db.VarChar(50)
-  description   String       @db.VarChar(300)
-  phoneNumber   String       @map("phone_number") @db.VarChar(12)
-  linkedinLink  String?      @map("linkedin_link") @db.VarChar(100)
-  facebookLink  String?      @map("facebook_link") @db.VarChar(100)
-  twitterLink   String?      @map("twitter_link") @db.VarChar(100)
-  instagramLink String?      @map("instagram_link") @db.VarChar(100)
-  fullAddressId Int          @unique @map("full_address_id")
-  fullAddress   full_address @relation(fields: [fullAddressId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id            Int     @id @default(autoincrement())
+  name          String  @db.VarChar(50)
+  description   String  @db.VarChar(300)
+  phoneNumber   String  @map("phone_number") @db.VarChar(12)
+  linkedinLink  String? @map("linkedin_link") @db.VarChar(100)
+  facebookLink  String? @map("facebook_link") @db.VarChar(100)
+  twitterLink   String? @map("twitter_link") @db.VarChar(100)
+  instagramLink String? @map("instagram_link") @db.VarChar(100)
+  fullAddressId Int     @unique @map("full_address_id")
+  fullAddress   Address @relation(fields: [fullAddressId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model file {
@@ -104,18 +104,24 @@ model file {
   intervention   intervention @relation(fields: [interventionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model full_address {
-  id              Int                 @id @default(autoincrement())
-  number          String?             @db.VarChar(50)
-  street          String?             @db.VarChar(150)
-  postalCode      String?             @map("postal_code") @db.VarChar(10)
-  locality        String?             @db.VarChar(100)
-  region          String?             @db.VarChar(100)
-  country         String?             @db.VarChar(100)
-  zoneId          Int                 @unique @map("zone_id")
-  companyInfo     company_info?
-  zone            zone                @relation(fields: [zoneId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  userFullAddress user_full_address[]
+model Address {
+  id          Int           @id @default(autoincrement())
+  number      String?       @db.VarChar(50)
+  street      String        @db.VarChar(150)
+  postalCode  String        @map("postal_code") @db.VarChar(10)
+  locality    String        @db.VarChar(100)
+  region      String?       @db.VarChar(100)
+  country     String        @default("France") @db.VarChar(100)
+  createdOn   DateTime      @default(now()) @map("created_on") @db.Timestamp(6)
+  deletedOn   DateTime?     @map("deleted_on") @db.Timestamp(6)
+  userId      Int?          @map("user_id")
+  zoneId      Int?          @map("zone_id")
+  appUser     AppUser?      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  companyInfo company_info?
+  zone        zone?         @relation(fields: [zoneId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([userId])
+  @@map("full_address")
 }
 
 model interval_ {
@@ -188,15 +194,6 @@ model role_permission {
   @@id([roleId, permissionsId])
 }
 
-model user_full_address {
-  userId        Int          @map("user_id")
-  fullAddressId Int          @map("full_address_id")
-  fullAddress   full_address @relation(fields: [fullAddressId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  appUser       AppUser      @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@id([userId, fullAddressId])
-}
-
 model user_permission {
   userId       Int        @map("user_id")
   permissionId Int        @map("permission_id")
@@ -222,7 +219,7 @@ model zone {
   createdOn   DateTime                @default(now()) @map("created_on") @db.Timestamp(6)
   updatedOn   DateTime?               @updatedAt @map("updated_on") @db.Timestamp(6)
   deletedOn   DateTime?               @map("deleted_on") @db.Timestamp(6)
-  fullAddress full_address?
+  addresses   Address[]
 }
 
 enum intervention_status {

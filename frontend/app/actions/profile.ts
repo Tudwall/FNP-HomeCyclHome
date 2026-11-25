@@ -26,11 +26,16 @@ export async function updateProfileAction(
 	}
 
 	try {
-		await apiFetch(`/users/${user.id}`, { method: "PATCH", body: parsed.data });
+		await apiFetch(`/users/${user.id}`, {
+			method: "PATCH",
+			body: parsed.data,
+		});
 	} catch (error) {
 		if (error instanceof ApiError) {
 			if (error.status === 401) redirect("/connexion");
-			return { message: "Impossible d'enregistrer votre profil. Réessayez." };
+			return {
+				message: "Impossible d'enregistrer votre profil. Réessayez.",
+			};
 		}
 		throw error;
 	}
@@ -63,13 +68,19 @@ export async function changePasswordAction(
 			if (error.status === 401) redirect("/connexion");
 			if (error.status === 403) {
 				return {
-					errors: { currentPassword: ["Mot de passe actuel incorrect."] },
+					errors: {
+						currentPassword: ["Mot de passe actuel incorrect."],
+					},
 				};
 			}
 			if (error.status === 429) {
-				return { message: "Trop de tentatives. Réessayez dans une minute." };
+				return {
+					message: "Trop de tentatives. Réessayez dans une minute.",
+				};
 			}
-			return { message: "Impossible de modifier le mot de passe. Réessayez." };
+			return {
+				message: "Impossible de modifier le mot de passe. Réessayez.",
+			};
 		}
 		throw error;
 	}
@@ -89,7 +100,10 @@ export async function deleteAccountAction(
 	}
 
 	try {
-		await apiFetch("/auth/account", { method: "DELETE", body: parsed.data });
+		await apiFetch("/auth/account", {
+			method: "DELETE",
+			body: parsed.data,
+		});
 	} catch (error) {
 		if (error instanceof ApiError) {
 			if (error.status === 401) redirect("/connexion");
@@ -97,9 +111,13 @@ export async function deleteAccountAction(
 				return { errors: { password: ["Mot de passe incorrect."] } };
 			}
 			if (error.status === 429) {
-				return { message: "Trop de tentatives. Réessayez dans une minute." };
+				return {
+					message: "Trop de tentatives. Réessayez dans une minute.",
+				};
 			}
-			return { message: "Impossible de supprimer votre compte. Réessayez." };
+			return {
+				message: "Impossible de supprimer votre compte. Réessayez.",
+			};
 		}
 		throw error;
 	}
