@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { CatalogModule } from './catalog/catalog.module';
+import { AddressesModule } from './addresses/addresses.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CatalogModule } from './catalog/catalog.module';
     BikesModule,
     PrismaModule,
     CatalogModule,
+    AddressesModule,
   ],
   controllers: [AppController],
   providers: [

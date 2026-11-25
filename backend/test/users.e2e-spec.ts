@@ -32,6 +32,17 @@ describe('Users & Auth (e2e)', () => {
     return agent;
   }
 
+  async function cleanup() {
+    const testUsers = {
+      OR: [
+        { email: { contains: 'e2e-' } },
+        { email: { endsWith: '@invalid' } },
+      ],
+    };
+    await prisma.address.deleteMany({ where: { appUser: testUsers } });
+    await prisma.appUser.deleteMany({ where: testUsers });
+  }
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -43,28 +54,14 @@ describe('Users & Auth (e2e)', () => {
     server = app.getHttpServer();
 
     prisma = app.get(PrismaService);
-    await prisma.appUser.deleteMany({
-      where: {
-        OR: [
-          { email: { contains: 'e2e-' } },
-          { email: { endsWith: '@invalid' } },
-        ],
-      },
-    });
+    await cleanup();
 
     loginId = await signup(loginEmail);
     otherId = await signup(otherEmail);
   });
 
   afterAll(async () => {
-    await prisma.appUser.deleteMany({
-      where: {
-        OR: [
-          { email: { contains: 'e2e-' } },
-          { email: { endsWith: '@invalid' } },
-        ],
-      },
-    });
+    await cleanup();
     await app.close();
   });
 
@@ -294,7 +291,27 @@ describe('Users & Auth (e2e)', () => {
       const id = await signup(email);
       const agent = await agentFor(email);
 
+      await agent
+        .put('/address')
+        .send({
+          street: 'rue des Lilas',
+          postalCode: '35000',
+          locality: 'Rennes',
+        })
+        .expect(200);
+
       await agent.delete('/auth/account').send({ password }).expect(204);
+
+      const addresses = await prisma.address.findMany({
+        where: { userId: id },
+      });
+      expect(addresses).toHaveLength(1);
+      expect(addresses[0]).toMatchObject({
+        street: 'Adresse supprimée',
+        number: null,
+        postalCode: '35000',
+        deletedOn: expect.any(Date),
+      });
 
       await agent.get('/bikes').expect(401);
 

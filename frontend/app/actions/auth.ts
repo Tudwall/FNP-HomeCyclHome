@@ -85,7 +85,11 @@ export async function signupAction(
 	} catch (error) {
 		if (error instanceof ApiError) {
 			if (error.status === 409) {
-				return { errors: { email: ["Un compte existe déjà avec cet email."] } };
+				return {
+					errors: {
+						email: ["Un compte existe déjà avec cet email."],
+					},
+				};
 			}
 			return { message: error.messages.join(" ") };
 		}
