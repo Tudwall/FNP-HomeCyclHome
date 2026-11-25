@@ -22,7 +22,10 @@ export default async function ProfilePage() {
 					Informations personnelles
 				</h2>
 				<ProfileForm
-					defaultValues={{ firstName: user.firstName, lastName: user.lastName }}
+					defaultValues={{
+						firstName: user.firstName,
+						lastName: user.lastName,
+					}}
 				/>
 			</div>
 

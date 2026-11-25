@@ -15,9 +15,7 @@ export function AccountNav() {
 	return (
 		<nav aria-label="Espace client" className="flex gap-2 md:flex-col">
 			{ITEMS.map(({ href, label, icon: Icon, exact }) => {
-				const isActive = exact
-					? pathname === href
-					: pathname.startsWith(href);
+				const isActive = exact ? pathname === href : pathname.startsWith(href);
 
 				return (
 					<Link
